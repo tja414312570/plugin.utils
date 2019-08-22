@@ -14,9 +14,9 @@ import java.util.Set;
 /**
  * ant style path matcher
  * 匹配规则 
- * * 匹配0-n个非"/"的数据
- * ** 匹配任意数据
- * ? 匹配任意一个数据  不包含"/"
+ * * 匹配0-n个非"/"的字符
+ * ** 匹配任意字符
+ * ? 匹配任意一个字符  不包含"/"
  * 变量使用
  * 将变量放在中括号之中，例如{page},默认将变量转为*，若要转为另外两种
  * 匹配方式，在变量后面追加匹配符号，如{page**},如果为?，在?之后，可以
@@ -238,9 +238,9 @@ iterator: while (index < express.length()) {
 	
 	public static boolean matchURI(String resource, List<Token> tokens) {
 		if(resource==null)
-			throw new RuntimeException("path is null");
+			throw new IllegalArgumentException("path is null");
 		if(tokens==null)
-			throw new RuntimeException("token set is null");
+			throw new IllegalArgumentException("token set is null");
 		Iterator<Token> iterator = tokens.iterator();
 		Token nT;
 		int p;

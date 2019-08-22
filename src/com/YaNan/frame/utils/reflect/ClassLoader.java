@@ -1,5 +1,8 @@
 package com.YaNan.frame.utils.reflect;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +17,9 @@ import java.util.Date;
 
 import com.YaNan.frame.utils.reflect.cache.ClassHelper;
 import com.YaNan.frame.utils.reflect.cache.ClassInfoCache;
+import com.YaNan.frame.utils.resource.Path;
+import com.YaNan.frame.utils.resource.ResourceManager;
+import com.sun.org.apache.bcel.internal.util.ClassPath;
 
 
 /**
@@ -1280,4 +1286,36 @@ public class ClassLoader extends java.lang.ClassLoader{
 		}
 		return null;
 	}
+	/**
+	 * 通过某加载器加载某类
+	 * @param clzzName
+	 * @param bytes
+	 * @param ncLoader
+	 * @return
+	 */
+	public static Class<?> loadClass(String clzzName, byte[] bytes, java.lang.ClassLoader ncLoader) {
+		try {
+			Class<?> loaderClass = ncLoader.getClass();
+			Method method = ClassHelper.getClassHelper(loaderClass).getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+			while(method == null && (loaderClass = loaderClass.getSuperclass()) != null) {
+				method = ClassHelper.getClassHelper(loaderClass).getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+			}
+			if(method == null)
+				return null;
+			method.setAccessible(true);
+			Class<?> resultClass = (Class<?>) method.invoke(ncLoader, clzzName,bytes,0,bytes.length);
+			method.setAccessible(false);
+			return resultClass;
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			throw new RuntimeException("failed to load class by "+ncLoader,e);
+		}
+	}
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		//获取当前线程的加载器
+		java.lang.ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		//从线程加载加载资源
+        return loader.loadClass(name);
+    }
 }
