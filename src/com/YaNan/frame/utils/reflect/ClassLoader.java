@@ -952,6 +952,8 @@ public class ClassLoader extends java.lang.ClassLoader{
 				if (interfaceClass.equals(inter))
 					return true;
 			tempClass = tempClass.getSuperclass();
+			if(tempClass == null)
+				break;
 		}
 		return false;
 	}
@@ -966,6 +968,8 @@ public class ClassLoader extends java.lang.ClassLoader{
 			if (tempClass.equals(parentClass))
 				return true;
 			tempClass = tempClass.getSuperclass();
+			if(tempClass == null)
+				break;
 		}
 		return false;
 	}
@@ -1000,6 +1004,8 @@ public class ClassLoader extends java.lang.ClassLoader{
 	public static Object castType(Object orgin, Class<?> targetType) {
 		if (orgin == null)
 			return null;
+		if(implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType))
+			return orgin;
 		// 整形
 		if (targetType.equals(int.class))
 			return (int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
@@ -1017,7 +1023,10 @@ public class ClassLoader extends java.lang.ClassLoader{
 		// 日期
 		if (targetType.equals(Date.class))
 			try {
-				return SimpleDateFormat.getInstance().parse((String) orgin);
+				if(extendsOf(orgin.getClass(), Date.class)) {
+					return orgin;
+				}
+				return SimpleDateFormat.getInstance().parse(orgin.toString());
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -1093,7 +1102,7 @@ public class ClassLoader extends java.lang.ClassLoader{
 		if (clzz.equals(Character.class))
 			return true;
 		// 日期
-		if (clzz.equals(Date.class))
+		if (extendsOf(clzz,Date.class))
 			return true;
 
 		// 以上所有类型的数组类型
@@ -1131,9 +1140,8 @@ public class ClassLoader extends java.lang.ClassLoader{
 		if (clzz.equals(Character[].class))
 			return true;
 		// 日期
-		if (clzz.equals(Date[].class))
+		if (extendsOf(clzz,Date[].class))
 			return true;
-
 		return false;
 	}
 
