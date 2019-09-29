@@ -1,8 +1,5 @@
 package com.YaNan.frame.utils.reflect;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -17,9 +14,6 @@ import java.util.Date;
 
 import com.YaNan.frame.utils.reflect.cache.ClassHelper;
 import com.YaNan.frame.utils.reflect.cache.ClassInfoCache;
-import com.YaNan.frame.utils.resource.Path;
-import com.YaNan.frame.utils.resource.ResourceManager;
-import com.sun.org.apache.bcel.internal.util.ClassPath;
 
 
 /**
@@ -1002,27 +996,28 @@ public class ClassLoader extends java.lang.ClassLoader{
 	}
 
 	public static Object castType(Object orgin, Class<?> targetType) {
-		if (orgin == null)
-			return null;
-		if(implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType))
+		if(orgin != null
+			&& (implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType)))
 			return orgin;
 		// 整形
 		if (targetType.equals(int.class))
-			return (int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
+			return orgin == null?0:(int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
 		if (targetType.equals(short.class))
-			return Short.parseShort((String) orgin);
+			return orgin == null?0:Short.parseShort((String) orgin);
 		if (targetType.equals(long.class))
-			return Long.parseLong(orgin.toString());
+			return orgin == null?0:Long.parseLong(orgin.toString());
 		if (targetType.equals(byte.class))
-			return Byte.parseByte(orgin.toString());
+			return orgin == null?0:Byte.parseByte(orgin.toString());
 		// 浮点
 		if (targetType.equals(float.class))
-			return Float.parseFloat(orgin.toString());
+			return orgin == null?0:Float.parseFloat(orgin.toString());
 		if (targetType.equals(double.class))
-			return Double.parseDouble(orgin.toString());
+			return orgin == null?false:Double.parseDouble(orgin.toString());
 		// 日期
 		if (targetType.equals(Date.class))
 			try {
+				if(orgin == null)
+					return null;
 				if(extendsOf(orgin.getClass(), Date.class)) {
 					return orgin;
 				}
@@ -1032,12 +1027,12 @@ public class ClassLoader extends java.lang.ClassLoader{
 			}
 		// 布尔型
 		if (targetType.equals(boolean.class))
-			return Boolean.parseBoolean((String) orgin);
+			return orgin == null?false:Boolean.parseBoolean((String) orgin);
 		// char
 		if (targetType.equals(char.class))
-			return (char) orgin;
+			return orgin == null?0:(char) orgin;
 		if (targetType.equals(String.class))
-			return orgin.toString();
+			return orgin == null?null:orgin.toString();
 		// 没有匹配到返回源数据
 		return orgin;
 	}
