@@ -499,6 +499,8 @@ public class ClassLoader extends java.lang.ClassLoader{
 	 */
 	public Object getFieldValue(String fieldName) throws IllegalAccessException {
 		Field field = this.infoCache.getField(fieldName);
+		if(field == null) 
+			field = this.infoCache.getDeclaredField(fieldName);
 		return getFieldValue(field);
 	}
 
