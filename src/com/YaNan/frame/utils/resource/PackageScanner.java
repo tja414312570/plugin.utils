@@ -4,10 +4,8 @@ package com.YaNan.frame.utils.resource;
 import java.io.File;
 import java.util.Arrays;
 
-import com.YaNan.frame.utils.resource.Path.PathInter;
 import com.YaNan.frame.utils.resource.ResourceManager;
 import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
-import com.YaNan.frame.utils.resource.Path;
 
 /**
  * 支持通配符,按照PathMath匹配模式
