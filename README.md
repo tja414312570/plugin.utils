@@ -13,3 +13,8 @@
 * 新增抽象资源实体(AbstractResourceEntry)，用于包裹可能的File或JarEntry
 * 新增资源扫描(ResourceScanner)，可以同时扫描路劲或则jar包
 * 将包扫描底层的扫描工具改为资源扫描
+# 20191108
+* 新增通过传入Class对象获取Class的ClassPath的方法
+```java
+ResourceManager.getClassPath(Logger.class)
+```
