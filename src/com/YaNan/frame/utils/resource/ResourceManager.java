@@ -6,7 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.YaNan.frame.utils.resource.Path.PathInter;
+import com.YaNan.frame.utils.resource.AbstractResourceEntry.Type;
+import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
 
 /**
  * 资源管理工具，获取文件
@@ -39,7 +40,7 @@ public class ResourceManager {
 	 * @param pathExpress
 	 * @return
 	 */
-	public static List<File> getResource(String pathExpress){
+	public static List<AbstractResourceEntry> getResource(String pathExpress){
 		pathExpress = getPathExress(pathExpress);
 		int index = pathExpress.indexOf("*");
 		int qndex = pathExpress.indexOf("?");
@@ -49,8 +50,8 @@ public class ResourceManager {
 			File file = new File(pathExpress);
 			if(!file.exists())
 				throw new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\"");
-			List<File> fileList = new ArrayList<File>();
-			fileList.add(file);
+			List<AbstractResourceEntry> fileList = new ArrayList<AbstractResourceEntry>();
+			fileList.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
 			return fileList;
 		}
 		String path = pathExpress.substring(0, index);
@@ -65,14 +66,15 @@ public class ResourceManager {
 			}
 		return getMatchFile(path,pathExpress);
 	}
-	private static List<File> getMatchFile(String pathExpress,String regex) {
-		Path path = new Path(pathExpress);
+	private static List<AbstractResourceEntry> getMatchFile(String pathExpress,String regex) {
+		ResourceScanner path = new ResourceScanner(pathExpress);
 		path.filter(regex);
-		final List<File> fileList = new ArrayList<File>();
-		path.scanner(new PathInter() {
+		final List<AbstractResourceEntry> fileList = new ArrayList<AbstractResourceEntry>();
+		path.scanner(new ResourceInter() {
+			
 			@Override
-			public void find(File file) {
-				fileList.add(file);
+			public void find(AbstractResourceEntry resource) {
+				fileList.add(resource);
 			}
 		});
 		return fileList;
@@ -80,23 +82,32 @@ public class ResourceManager {
 	public static String classPath() {
 		return ResourceManager.class.getClassLoader().getResource("").getPath().replace("%20"," ");
 	}
+	/**
+	 * @param name
+	 * @return
+	 */
 	public static String getClassPath(String name) {
 		return name.replace("%20"," ").replace(ResourceManager.classPath(), "").replaceAll("/|\\\\", ".");
 	}
+	/**
+	 * get classpath by class file 
+	 * @param clzzs an array contains class all classpath
+	 * @return
+	 */
 	public static String[] getClassPath(Class<?>... clzzs) {
 		String[] classPaths = new String[clzzs.length];
 		for(int i = 0;i<clzzs.length;i++) {
 			Class<?> clzz = clzzs[i];
-			String packagePath = clzz.getPackage().getName().replace(".",File.separator);
 			String path = "";
 			try {
 				path = clzz.getResource(".").getFile();
-				classPaths[i] = path.substring(0,path.lastIndexOf(packagePath)-1);
+				String packagePath = clzz.getPackage().getName().replace(".",File.separator);
+				classPaths[i] = path.replace("%20"," ").substring(0,path.lastIndexOf(packagePath)-1);
 			}catch(Exception e) {
 				path = clzz.getProtectionDomain().getCodeSource().getLocation().getFile();  
 				try {
 					path = java.net.URLDecoder.decode(path, "UTF-8");
-					classPaths[i] = path;
+					classPaths[i] = path.replace("%20"," ");
 				} catch (UnsupportedEncodingException t) {
 					t.addSuppressed(e);
 					throw new ResourceScannerException(t);

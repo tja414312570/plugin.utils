@@ -84,12 +84,18 @@ public class AbstractResourceEntry {
 			throw new RuntimeException("jar file could not get output");
 		return new FileOutputStream(this.file);
 	}
-	public InputStream getInputStream() throws FileNotFoundException {
-		if(this.type == Type.JAR) {
-			return ClassLoader.getSystemResourceAsStream(this.jarEntry.getName());
-		}else {
-			FileInputStream fis = new FileInputStream(this.file);
-			return fis;
+	public InputStream getInputStream(){
+		try {
+			if(this.type == Type.JAR) {
+				return ClassLoader.getSystemResourceAsStream(this.jarEntry.getName());
+			}else {
+				FileInputStream fis;
+				
+					fis = new FileInputStream(this.file);
+					return fis;
+			}
+		} catch (FileNotFoundException e) {
+			throw new ResourceInputStreamException(e);
 		}
 	}
 	public String getName() {
