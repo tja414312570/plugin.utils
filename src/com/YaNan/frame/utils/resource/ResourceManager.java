@@ -2,6 +2,7 @@ package com.YaNan.frame.utils.resource;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,5 +82,27 @@ public class ResourceManager {
 	}
 	public static String getClassPath(String name) {
 		return name.replace("%20"," ").replace(ResourceManager.classPath(), "").replaceAll("/|\\\\", ".");
+	}
+	public static String[] getClassPath(Class<?>... clzzs) {
+		String[] classPaths = new String[clzzs.length];
+		for(int i = 0;i<clzzs.length;i++) {
+			Class<?> clzz = clzzs[i];
+			String packagePath = clzz.getPackage().getName().replace(".",File.separator);
+			String path = "";
+			try {
+				path = clzz.getResource(".").getFile();
+				classPaths[i] = path.substring(0,path.lastIndexOf(packagePath)-1);
+			}catch(Exception e) {
+				path = clzz.getProtectionDomain().getCodeSource().getLocation().getFile();  
+				try {
+					path = java.net.URLDecoder.decode(path, "UTF-8");
+					classPaths[i] = path;
+				} catch (UnsupportedEncodingException t) {
+					t.addSuppressed(e);
+					throw new ResourceScannerException(t);
+				}
+			}
+		}
+		return classPaths;
 	}
 }
