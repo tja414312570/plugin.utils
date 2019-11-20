@@ -40,7 +40,7 @@ public class ResourceManager {
 	 * @param pathExpress
 	 * @return
 	 */
-	public static List<AbstractResourceEntry> getResource(String pathExpress){
+	public static List<AbstractResourceEntry> getResources(String pathExpress){
 		pathExpress = getPathExress(pathExpress);
 		int index = pathExpress.indexOf("*");
 		int qndex = pathExpress.indexOf("?");
@@ -65,6 +65,30 @@ public class ResourceManager {
 				e.printStackTrace();
 			}
 		return getMatchFile(path,pathExpress);
+	}
+	public static AbstractResourceEntry getResource(String pathExpress){
+		pathExpress = getPathExress(pathExpress);
+		int index = pathExpress.indexOf("*");
+		int qndex = pathExpress.indexOf("?");
+		if(qndex>-1&&qndex<index)
+			index = qndex;
+		if(index==-1){
+			File file = new File(pathExpress);
+			if(!file.exists())
+				throw new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\"");
+			return new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null);
+		}
+		String path = pathExpress.substring(0, index);
+		qndex = path.lastIndexOf("/");
+		if(qndex>0)
+			path = path.substring(0,qndex);
+		if(path==null||path.trim().equals(""))
+			try {
+				path = new File("").getCanonicalPath();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		return getMatchFile(path,pathExpress).get(0);
 	}
 	private static List<AbstractResourceEntry> getMatchFile(String pathExpress,String regex) {
 		ResourceScanner path = new ResourceScanner(pathExpress);
