@@ -6,6 +6,7 @@ import java.security.PrivilegedExceptionAction;
 
 import sun.misc.Unsafe;
 
+@SuppressWarnings("restriction")
 public class UnsafeUtils {
 	private static final Unsafe THE_UNSAFE;
 	static{

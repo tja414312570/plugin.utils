@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.YaNan.frame.utils.resource.AbstractResourceEntry.Type;
@@ -66,7 +67,7 @@ public class ResourceManager {
 			}
 		return getMatchFile(path,pathExpress);
 	}
-	public static AbstractResourceEntry getResource(String pathExpress){
+	public static List<AbstractResourceEntry> getResourceList(String pathExpress){
 		pathExpress = getPathExress(pathExpress);
 		int index = pathExpress.indexOf("*");
 		int qndex = pathExpress.indexOf("?");
@@ -76,7 +77,7 @@ public class ResourceManager {
 			File file = new File(pathExpress);
 			if(!file.exists())
 				throw new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\"");
-			return new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null);
+			return Arrays.asList(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
 		}
 		String path = pathExpress.substring(0, index);
 		qndex = path.lastIndexOf("/");
@@ -88,7 +89,11 @@ public class ResourceManager {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		return getMatchFile(path,pathExpress).get(0);
+		return getMatchFile(path,pathExpress);
+	}
+	public static AbstractResourceEntry getResource(String pathExpress){
+		List<AbstractResourceEntry>  list = getResourceList(pathExpress);
+		return list == null || list.isEmpty() ? null : list.get(0);
 	}
 	private static List<AbstractResourceEntry> getMatchFile(String pathExpress,String regex) {
 		ResourceScanner path = new ResourceScanner(pathExpress);
@@ -104,7 +109,7 @@ public class ResourceManager {
 		return fileList;
 	}
 	public static String classPath() {
-		return ResourceManager.class.getClassLoader().getResource("").getPath().replace("%20"," ");
+		return Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
 	}
 	/**
 	 * @param name
@@ -124,9 +129,9 @@ public class ResourceManager {
 			Class<?> clzz = clzzs[i];
 			String path = "";
 			try {
-				path = clzz.getResource(".").getFile();
+				path = clzz.getResource(".").getFile().replace("%20"," ");
 				String packagePath = clzz.getPackage().getName().replace(".",File.separator);
-				classPaths[i] = path.replace("%20"," ").substring(0,path.lastIndexOf(packagePath)-1);
+				classPaths[i] = path.substring(0,path.lastIndexOf(packagePath));
 			}catch(Exception e) {
 				path = clzz.getProtectionDomain().getCodeSource().getLocation().getFile();  
 				try {
