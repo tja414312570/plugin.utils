@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.YaNan.frame.utils.asserts.Assert;
+import com.YaNan.frame.utils.asserts.IsNotNullException;
 import com.YaNan.frame.utils.resource.AbstractResourceEntry.Type;
 import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
 
@@ -18,6 +20,7 @@ import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
 public class ResourceManager {
 	final static String CLASSPATH_EXPRESS = "classpath:";
 	final static String PROJECT_EXPRESS = "project:";
+	static volatile String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
 	public static String getPathExress(String pathExpress){
 		if(pathExpress==null)
 			throw new ResourcePathExpressException("path express is null");
@@ -109,7 +112,7 @@ public class ResourceManager {
 		return fileList;
 	}
 	public static String classPath() {
-		return Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
+		return classPath;
 	}
 	/**
 	 * @param name
@@ -144,5 +147,21 @@ public class ResourceManager {
 			}
 		}
 		return classPaths;
+	}
+	public static void switchClassPath(Class<?> contextClass) {
+		Assert.isNull(contextClass, "content class is null");
+		synchronized (ResourceManager.class) {
+			classPath = getClassPath(contextClass)[0];
+		}
+	}
+	public static void switchClassPathIfNotExist(Class<?> contextClass) {
+		try {
+			Assert.isNotNull(contextClass);
+			synchronized (ResourceManager.class) {
+				classPath = getClassPath(contextClass)[0];
+			}
+		}catch(IsNotNullException t) {
+			
+		}
 	}
 }

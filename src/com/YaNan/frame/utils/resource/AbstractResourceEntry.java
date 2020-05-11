@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarEntry;
 
-public class AbstractResourceEntry {
+public class AbstractResourceEntry{
 	public static enum Type{
 		JAR,FILE
 	}
@@ -28,6 +28,14 @@ public class AbstractResourceEntry {
 		this.type = type;
 		this.file = file;
 		this.jarEntry = jarEntry;
+	}
+	public AbstractResourceEntry(File file) {
+		super();
+		this.path = file.getAbsolutePath();
+		this.name = file.getName();
+		this.origin = file.getAbsolutePath();
+		this.type = Type.FILE;
+		this.file = file;
 	}
 	public String getPath() {
 		return path;
