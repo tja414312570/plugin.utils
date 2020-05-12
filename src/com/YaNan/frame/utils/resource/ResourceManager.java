@@ -6,11 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import com.YaNan.frame.utils.StringUtil;
 import com.YaNan.frame.utils.asserts.Assert;
-import com.YaNan.frame.utils.asserts.IsNotNullException;
+import com.YaNan.frame.utils.asserts.AssertNotNullException;
 import com.YaNan.frame.utils.resource.AbstractResourceEntry.Type;
-import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
 
 /**
  * 资源管理工具，获取文件
@@ -22,18 +21,19 @@ public class ResourceManager {
 	final static String PROJECT_EXPRESS = "project:";
 	static volatile String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
 	public static String getPathExress(String pathExpress){
-		if(pathExpress==null)
-			throw new ResourcePathExpressException("path express is null");
+		Assert.isNull(pathExpress,new ResourcePathExpressException("path express is null"));
 		int cpIndex = pathExpress.indexOf(CLASSPATH_EXPRESS);
-		if(cpIndex>-1)
+		if(cpIndex>-1) {
 			pathExpress= classPath()+pathExpress.substring(cpIndex+CLASSPATH_EXPRESS.length());
+		}
 		cpIndex = pathExpress.indexOf(PROJECT_EXPRESS);
-		if(cpIndex>-1)
+		if(cpIndex>-1) {
 			try {
 				pathExpress= projectPath()+pathExpress.substring(cpIndex+PROJECT_EXPRESS.length());
 			} catch (IOException e) {
 				throw new ResourceNotFoundException("failed to get project director",e);
 			}
+		}
 		return pathExpress;
 	}
 	public static String projectPath() throws IOException {
@@ -44,32 +44,6 @@ public class ResourceManager {
 	 * @param pathExpress
 	 * @return
 	 */
-	public static List<AbstractResourceEntry> getResources(String pathExpress){
-		pathExpress = getPathExress(pathExpress);
-		int index = pathExpress.indexOf("*");
-		int qndex = pathExpress.indexOf("?");
-		if(qndex>-1&&qndex<index)
-			index = qndex;
-		if(index==-1){
-			File file = new File(pathExpress);
-			if(!file.exists())
-				throw new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\"");
-			List<AbstractResourceEntry> fileList = new ArrayList<AbstractResourceEntry>();
-			fileList.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
-			return fileList;
-		}
-		String path = pathExpress.substring(0, index);
-		qndex = path.lastIndexOf("/");
-		if(qndex>0)
-			path = path.substring(0,qndex);
-		if(path==null||path.trim().equals(""))
-			try {
-				path = new File("").getCanonicalPath();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		return getMatchFile(path,pathExpress);
-	}
 	public static List<AbstractResourceEntry> getResourceList(String pathExpress){
 		pathExpress = getPathExress(pathExpress);
 		int index = pathExpress.indexOf("*");
@@ -78,15 +52,15 @@ public class ResourceManager {
 			index = qndex;
 		if(index==-1){
 			File file = new File(pathExpress);
-			if(!file.exists())
-				throw new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\"");
+			Assert.isFalse(file.exists(),new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\""));
 			return Arrays.asList(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
 		}
 		String path = pathExpress.substring(0, index);
 		qndex = path.lastIndexOf("/");
-		if(qndex>0)
+		if(qndex>0) {
 			path = path.substring(0,qndex);
-		if(path==null||path.trim().equals(""))
+		}
+		if(StringUtil.isBlank(path))
 			try {
 				path = new File("").getCanonicalPath();
 			} catch (IOException e) {
@@ -102,13 +76,7 @@ public class ResourceManager {
 		ResourceScanner path = new ResourceScanner(pathExpress);
 		path.filter(regex);
 		final List<AbstractResourceEntry> fileList = new ArrayList<AbstractResourceEntry>();
-		path.scanner(new ResourceInter() {
-			
-			@Override
-			public void find(AbstractResourceEntry resource) {
-				fileList.add(resource);
-			}
-		});
+		path.scanner((resource)->fileList.add(resource));
 		return fileList;
 	}
 	public static String classPath() {
@@ -160,7 +128,7 @@ public class ResourceManager {
 			synchronized (ResourceManager.class) {
 				classPath = getClassPath(contextClass)[0];
 			}
-		}catch(IsNotNullException t) {
+		}catch(AssertNotNullException t) {
 			
 		}
 	}

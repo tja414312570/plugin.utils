@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarEntry;
 
+import com.YaNan.frame.utils.asserts.Assert;
+
 public class AbstractResourceEntry{
 	public static enum Type{
 		JAR,FILE
@@ -83,13 +85,10 @@ public class AbstractResourceEntry{
 		return -1l;
 	}
 	public List<File> listResource() {
-		List<File> resources = new ArrayList<File>();
-		
-		return resources;
+		return new ArrayList<File>();
 	}
 	public OutputStream getOutputStream() throws FileNotFoundException {
-		if(this.type == Type.JAR)
-			throw new RuntimeException("jar file could not get output");
+		Assert.isTrue(this.type == Type.JAR,new RuntimeException("jar file could not get output"));
 		return new FileOutputStream(this.file);
 	}
 	public InputStream getInputStream(){
@@ -97,10 +96,7 @@ public class AbstractResourceEntry{
 			if(this.type == Type.JAR) {
 				return ClassLoader.getSystemResourceAsStream(this.jarEntry.getName());
 			}else {
-				FileInputStream fis;
-				
-					fis = new FileInputStream(this.file);
-					return fis;
+				return new FileInputStream(this.file);
 			}
 		} catch (FileNotFoundException e) {
 			throw new ResourceInputStreamException(e);

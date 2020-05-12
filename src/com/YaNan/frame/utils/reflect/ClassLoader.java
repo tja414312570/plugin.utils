@@ -706,8 +706,9 @@ public class ClassLoader extends java.lang.ClassLoader{
 	public Object invokeMethod(Object object, String methodName, Class<?>[] parameterType, Object... args)
 			throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Method method = this.infoCache.getMethod(methodName, parameterType);
-		if(method==null)
+		if(method==null) {
 			method = this.infoCache.getDeclaredMethod(methodName, parameterType);
+		}
 		if (method == null) {
 			StringBuilder ptStr = new StringBuilder(this.loadClass.getName()).append(".").append(methodName)
 					.append("(");
@@ -923,9 +924,11 @@ public class ClassLoader extends java.lang.ClassLoader{
 	 */
 	public static boolean implementOf(Class<?> orginClass, Class<?> interfaceClass) {
 		Class<?>[] cls = orginClass.getInterfaces();
-		for (Class<?> cCls : cls)
-			if (cCls.equals(interfaceClass))
+		for (Class<?> cCls : cls) {
+			if (cCls.equals(interfaceClass)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
@@ -941,15 +944,19 @@ public class ClassLoader extends java.lang.ClassLoader{
 	public static boolean implementsOf(Class<?> orginClass, Class<?> interfaceClass) {
 		Class<?> tempClass = orginClass;
 		while (tempClass != null && !tempClass.equals(Object.class)) {
-			if (tempClass.equals(interfaceClass))
+			if (tempClass.equals(interfaceClass)) {
 				return true;
+			}
 			Class<?>[] interfaces = tempClass.getInterfaces();
-			for (Class<?> inter : interfaces)
-				if (interfaceClass.equals(inter))
+			for (Class<?> inter : interfaces) {
+				if (interfaceClass.equals(inter)) {
 					return true;
+				}
+			}
 			tempClass = tempClass.getSuperclass();
-			if(tempClass == null)
+			if(tempClass == null) {
 				break;
+			}
 		}
 		return false;
 	}
@@ -961,62 +968,80 @@ public class ClassLoader extends java.lang.ClassLoader{
 	public static boolean extendsOf(Class<?> orginClass, Class<?> parentClass) {
 		Class<?> tempClass = orginClass;
 		while (!tempClass.equals(Object.class)) {
-			if (tempClass.equals(parentClass))
+			if (tempClass.equals(parentClass)) {
 				return true;
+			}
 			tempClass = tempClass.getSuperclass();
-			if(tempClass == null)
+			if(tempClass == null) {
 				break;
+			}
 		}
 		return false;
 	}
 
 	public static Class<?> patchBaseType(Object patchType) {
 		// 无类型
-		if (patchType.getClass().equals(Void.class))
+		if (patchType.getClass().equals(Void.class)) {
 			return void.class;
+		}
 		// 整形
-		if (patchType.getClass().equals(Integer.class))
+		if (patchType.getClass().equals(Integer.class)) {
 			return int.class;
-		if (patchType.getClass().equals(Short.class))
+		}
+		if (patchType.getClass().equals(Short.class)) {
 			return short.class;
-		if (patchType.getClass().equals(Long.class))
+		}
+		if (patchType.getClass().equals(Long.class)) {
 			return long.class;
+		}
 		// 浮点
-		if (patchType.getClass().equals(Double.class))
+		if (patchType.getClass().equals(Double.class)) {
 			return double.class;
-		if (patchType.getClass().equals(Float.class))
+		}
+		if (patchType.getClass().equals(Float.class)) {
 			return float.class;
+		}
 		// 字节
-		if (patchType.getClass().equals(Byte.class))
+		if (patchType.getClass().equals(Byte.class)) {
 			return byte.class;
-		if (patchType.getClass().equals(Character.class))
+		}
+		if (patchType.getClass().equals(Character.class)) {
 			return char.class;
+		}
 		// 布尔
-		if (patchType.getClass().equals(Boolean.class))
+		if (patchType.getClass().equals(Boolean.class)) {
 			return boolean.class;
+		}
 		return patchType.getClass();
 	}
 
 	public static Object castType(Object orgin, Class<?> targetType) {
 		if(orgin != null
-			&& (implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType)))
+			&& (implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType))) {
 			return orgin;
+		}
 		// 整形
-		if (targetType.equals(int.class))
+		if (targetType.equals(int.class)) {
 			return orgin == null?0:(int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
-		if (targetType.equals(short.class))
+		}
+		if (targetType.equals(short.class)) {
 			return orgin == null?0:Short.parseShort((String) orgin);
-		if (targetType.equals(long.class))
+		}
+		if (targetType.equals(long.class)) {
 			return orgin == null?0:Long.parseLong(orgin.toString());
-		if (targetType.equals(byte.class))
+		}
+		if (targetType.equals(byte.class)) {
 			return orgin == null?0:Byte.parseByte(orgin.toString());
+		}
 		// 浮点
-		if (targetType.equals(float.class))
+		if (targetType.equals(float.class)) {
 			return orgin == null?0:Float.parseFloat(orgin.toString());
-		if (targetType.equals(double.class))
+		}
+		if (targetType.equals(double.class)) {
 			return orgin == null?false:Double.parseDouble(orgin.toString());
+		}
 		// 日期
-		if (targetType.equals(Date.class))
+		if (targetType.equals(Date.class)) {
 			try {
 				if(orgin == null)
 					return null;
@@ -1027,14 +1052,18 @@ public class ClassLoader extends java.lang.ClassLoader{
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
+		}
 		// 布尔型
-		if (targetType.equals(boolean.class))
+		if (targetType.equals(boolean.class)) {
 			return orgin == null?false:Boolean.parseBoolean((String) orgin);
+		}
 		// char
-		if (targetType.equals(char.class))
+		if (targetType.equals(char.class)) {
 			return orgin == null?0:(char) orgin;
-		if (targetType.equals(String.class))
+		}
+		if (targetType.equals(String.class)) {
 			return orgin == null?null:orgin.toString();
+		}
 		// 没有匹配到返回源数据
 		return orgin;
 	}

@@ -5,9 +5,9 @@ package com.YaNan.frame.utils.asserts;
  * @author yanan
  *
  */
-public abstract class Function {
+public interface Function {
 	/**
 	 * 
 	 */
-	abstract void execute();
+	void execute();
 }

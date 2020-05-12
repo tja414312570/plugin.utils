@@ -9,6 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.YaNan.frame.utils.asserts.Assert;
+
 import java.util.Set;
 
 /**
@@ -144,7 +147,7 @@ iterator: while (index < express.length()) {
 		if (express.indexOf("{", sufIndex) == -1) {
 			buffer.append(express);
 			tokens = buildToken(express,index);
-		} else
+		} else {
 			while ((preIndex = express.indexOf("{", sufIndex)) != -1) {
 				String temp = null;
 				// 获取变量的前面部分内容
@@ -157,9 +160,7 @@ iterator: while (index < express.length()) {
 				}
 				// 截取变量部分
 				sufIndex = express.indexOf("}", preIndex);
-				if (sufIndex < 0)
-					throw new RuntimeException(
-							"express " + express + " error,the Variable descriptors are not equal,please check ");
+				Assert.isTrue(sufIndex < 0,new RuntimeException("express " + express + " error,the Variable descriptors are not equal,please check "));
 				String exp = "*";
 				String variable = express.substring(preIndex + 1, sufIndex);
 				// 新建一个Token
@@ -183,7 +184,7 @@ iterator: while (index < express.length()) {
 						} else {
 							try {
 								String num = variable.substring(i + 1);
-								if (!num.isEmpty()) {
+								if (StringUtil.isNotEmpty(num)) {
 									exp = "?";
 									int bum = (int) parseBaseType(int.class, num, null);
 									while (--bum > 0)
@@ -212,6 +213,7 @@ iterator: while (index < express.length()) {
 				}
 				sufIndex++;
 			}
+		}
 		this.buildExpress = buffer.toString();
 	}
 	
@@ -479,25 +481,31 @@ iterator: while (index < express.length()) {
 			if(!isMatch())
 				throw new RuntimeException("express \""+regex+"\" is not match path \""+resource+"\"");
 			variables = new HashMap<String,String>();
-			Iterator<Token> iterator = this.tokens.iterator();
-			while(iterator.hasNext()){
-				Token token = iterator.next();
+			this.tokens.forEach((token)->{
 				if(token.getType()>0 && StringUtil.isNotEmpty(token.getName()))
 					this.variables.put(token.getName(), token.getValue());
-			}
+			});
+//			Iterator<Token> iterator = this.tokens.iterator();
+//			while(iterator.hasNext()){
+//				Token token = iterator.next();
+//				if(token.getType()>0 && StringUtil.isNotEmpty(token.getName()))
+//					this.variables.put(token.getName(), token.getValue());
+//			}
 		}
 		/**
 		 * 获取变量的集合
 		 * @return
 		 */
 		public  Set<Entry<String, String>> variableSet(){
-			if(this.variables==null)
+			if(this.variables==null) {
 				this.initVariable();
+			}
 			return this.variables.entrySet();
 		}
 		public Map<String, String> variableMap() {
-			if(this.variables==null)
+			if(this.variables==null) {
 				this.initVariable();
+			}
 			return this.variables;
 		}
 		/**
@@ -506,8 +514,9 @@ iterator: while (index < express.length()) {
 		 * @return
 		 */
 		public String getVariable(String varName){
-			if(this.variables==null)
+			if(this.variables==null) {
 				this.initVariable();
+			}
 			return this.variables.get(varName);
 		}
 		Matcher(String regex, String resource, List<Token> tokens, boolean result) {

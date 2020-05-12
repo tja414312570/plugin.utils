@@ -110,10 +110,12 @@ public class ClassHelper {
 		boolean find=tempClass.equals(endClass)?true:false;
 		while(!find){
 			Field[] fields = ClassInfoCache.getClassHelper(tempClass).getDeclaredFields();
-			for(Field field : fields)
+			for(Field field : fields) {
 				fieldList.add(field);
-			if((tempClass = tempClass.getSuperclass()).equals(endClass))
-					find = true;
+			}
+			if((tempClass = tempClass.getSuperclass()).equals(endClass)) {
+				find = true;
+			}
 		}
 		return fieldList.toArray(new Field[]{});
 	}
@@ -147,8 +149,9 @@ public class ClassHelper {
 				fieldHelpers.put(field,new FieldHelper(field));
 				allFieldMap.put(field.getName(), field);
 			}
-			if((tempClass = tempClass.getSuperclass()).equals(endClass))
-					find = true;
+			if((tempClass = tempClass.getSuperclass()).equals(endClass)) {
+				find = true;
+			}
 		}
 		return fieldList.toArray(new Field[]{});
 	}
@@ -175,8 +178,9 @@ public class ClassHelper {
 	 * @return
 	 */
 	public Field getAnyField(String fieldName){
-		if(this.allFieldMap==null)
+		if(this.allFieldMap==null) {
 			this.buildAllFields();
+		}
 		return this.allFieldMap.get(fieldName);
 	}
 	public Field getDeclaredField(String fieldName){
@@ -211,8 +215,9 @@ public class ClassHelper {
 	}
 	public static int hash(Class<?>...clzz){
 		int hash = 0;
-		for(Class<?> clz:clzz)
+		for(Class<?> clz:clzz) {
 			hash+=clz==null?1:clz.getName().hashCode();
+		}
 		return hash;
 	}
 	public static int hash(Parameter parameter,Annotation annotation){
@@ -226,8 +231,9 @@ public class ClassHelper {
 	}
 	public static String hashString(Class<?>...clzz){
 		StringBuilder sb = new StringBuilder();
-		for(Class<?> clz:clzz)
+		for(Class<?> clz:clzz) {
 			sb.append(clz.getName());
+		}
 		return sb.toString();
 	}
 	public Class<?> getCacheClass() {
