@@ -1076,13 +1076,16 @@ public class ClassLoader extends java.lang.ClassLoader{
 	 * @throws ParseException
 	 */
 	public static Object parseBaseTypeArray(Class<?> clzz, String[] arg, String format) throws ParseException {
-		if (!clzz.isArray())
+		if (!clzz.isArray()) {
 			return parseBaseType(clzz, arg[0], format);
-		if (clzz.equals(String[].class))
+		}
+		if (clzz.equals(String[].class)) {
 			return arg;
+		}
 		Object[] args = new Object[arg.length];
-		for (int i = 0; i < args.length; i++)
+		for (int i = 0; i < args.length; i++) {
 			args[i] = parseBaseType(clzz, arg[i], format);
+		}
 		return args;
 	}
 	/**

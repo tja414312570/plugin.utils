@@ -42,12 +42,12 @@ public class ResourceScanner {
 		}
 		// 添加事件
 		File file = new File(source);
-		Assert.isTrue(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
+		Assert.isFalse(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 
 	public ResourceScanner(File file) {
-		Assert.isTrue(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
+		Assert.isFalse(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 

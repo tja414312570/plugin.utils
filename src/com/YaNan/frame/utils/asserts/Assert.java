@@ -57,5 +57,13 @@ public class Assert {
 	public static void isFalse(final boolean bol,RuntimeException throwable) {
 		isTrue(!bol,throwable);
 	}
+	public static boolean equalsAny(Class<?> object, Class<?>... classs) {
+		for(Class<?> clzz : classs) {
+			if(clzz.equals(object)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }
