@@ -189,6 +189,12 @@ public class ClassHelper {
 	public Constructor<?> getConstructor(Class<?>...parameterTypes){
 		return this.constructorMap.get(hash(parameterTypes));
 	}
+	public Constructor<?>[] getConstructors(){
+		return this.constructors;
+	}
+	public Constructor<?>[] getDeclaredConstructors(){
+		return this.declaredConstructors;
+	}
 	public Constructor<?> getDedlaredConstructor(Class<?>...parameterTypes){
 		return this.declaredConstructorMap.get(hash(parameterTypes));
 	}

@@ -21,7 +21,9 @@ public class ResourceManager {
 	final static String PROJECT_EXPRESS = "project:";
 	static volatile String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
 	public static String getPathExress(String pathExpress){
-		Assert.isNull(pathExpress,new ResourcePathExpressException("path express is null"));
+		if(pathExpress == null) {
+			throw new ResourcePathExpressException("path express is null");
+		}
 		int cpIndex = pathExpress.indexOf(CLASSPATH_EXPRESS);
 		if(cpIndex>-1) {
 			pathExpress= classPath()+pathExpress.substring(cpIndex+CLASSPATH_EXPRESS.length());
