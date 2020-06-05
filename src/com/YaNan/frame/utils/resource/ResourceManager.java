@@ -6,37 +6,48 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
+import java.util.stream.Collectors;
+
 import com.YaNan.frame.utils.StringUtil;
 import com.YaNan.frame.utils.asserts.Assert;
-import com.YaNan.frame.utils.asserts.AssertNotNullException;
 import com.YaNan.frame.utils.resource.AbstractResourceEntry.Type;
 
 /**
  * 资源管理工具，获取文件
+ * 支持多个ClassPath，支持自动查询主ClassPath
  * @author yanan
  *
  */
 public class ResourceManager {
 	final static String CLASSPATH_EXPRESS = "classpath:";
+	final static String CLASSPATHS_EXPRESS = "classpath*:";
 	final static String PROJECT_EXPRESS = "project:";
-	static volatile String classPath = Thread.currentThread().getContextClassLoader().getResource("").getPath().replace("%20"," ");
-	public static String getPathExress(String pathExpress){
+	static volatile String[] classPath;
+	public static String[] getPathExress(String pathExpress){
 		if(pathExpress == null) {
 			throw new ResourcePathExpressException("path express is null");
 		}
 		int cpIndex = pathExpress.indexOf(CLASSPATH_EXPRESS);
 		if(cpIndex>-1) {
-			pathExpress= classPath()+pathExpress.substring(cpIndex+CLASSPATH_EXPRESS.length());
+			return new String[]{classPath()+pathExpress.substring(cpIndex+CLASSPATH_EXPRESS.length())};
+		}
+		cpIndex = pathExpress.indexOf(CLASSPATHS_EXPRESS);
+		if(cpIndex>-1) {
+			String[] temp = new String[classPaths().length];
+			for(int i = 0;i<temp.length;i++)
+				temp[i] = classPaths()[i]+pathExpress.substring(cpIndex+CLASSPATHS_EXPRESS.length());
+			return temp;
 		}
 		cpIndex = pathExpress.indexOf(PROJECT_EXPRESS);
 		if(cpIndex>-1) {
 			try {
-				pathExpress= projectPath()+pathExpress.substring(cpIndex+PROJECT_EXPRESS.length());
+				return new String[]{projectPath()+pathExpress.substring(cpIndex+PROJECT_EXPRESS.length())};
 			} catch (IOException e) {
 				throw new ResourceNotFoundException("failed to get project director",e);
 			}
 		}
-		return pathExpress;
+		return new String[]{pathExpress}; 
 	}
 	public static String projectPath() throws IOException {
 		return new File("").getCanonicalPath().replace("%20"," ");
@@ -46,29 +57,37 @@ public class ResourceManager {
 	 * @param pathExpress
 	 * @return
 	 */
-	public static List<AbstractResourceEntry> getResourceList(String pathExpress){
-		pathExpress = getPathExress(pathExpress);
-		int index = pathExpress.indexOf("*");
-		int qndex = pathExpress.indexOf("?");
-		if(qndex>-1&&qndex<index)
-			index = qndex;
-		if(index==-1){
-			File file = new File(pathExpress);
-			Assert.isFalse(file.exists(),new ResourceNotFoundException("resource \"" +pathExpress+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\""));
-			return Arrays.asList(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
-		}
-		String path = pathExpress.substring(0, index);
-		qndex = path.lastIndexOf("/");
-		if(qndex>0) {
-			path = path.substring(0,qndex);
-		}
-		if(StringUtil.isBlank(path))
-			try {
-				path = new File("").getCanonicalPath();
-			} catch (IOException e) {
-				e.printStackTrace();
+	public static List<AbstractResourceEntry> getResourceList(String pathExpresss){
+		String[] pathResults = getPathExress(pathExpresss);
+		List<AbstractResourceEntry> result = new ArrayList<AbstractResourceEntry>();
+		for(String pathResult : pathResults){
+			int index = pathResult.indexOf("*");
+			int qndex = pathResult.indexOf("?");
+			if(qndex>-1&&qndex<index)
+				index = qndex;
+			if(index==-1){
+				File file = new File(pathResult);
+				if(file.exists()) {
+					result.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(), Type.FILE, file, null));
+				}
+				continue;
+//				Assert.isFalse(file.exists(),new ResourceNotFoundException("resource \"" +pathResult+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\""));
+//				return Arrays.asList();
 			}
-		return getMatchFile(path,pathExpress);
+			String path = pathResult.substring(0, index);
+			qndex = path.lastIndexOf("/");
+			if(qndex>0) {
+				path = path.substring(0,qndex);
+			}
+			if(StringUtil.isBlank(path))
+				try {
+					path = new File("").getCanonicalPath();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			result.addAll(getMatchFile(path,pathResult));
+		}
+		return result.stream().distinct().collect(Collectors.toList());
 	}
 	public static AbstractResourceEntry getResource(String pathExpress){
 		List<AbstractResourceEntry>  list = getResourceList(pathExpress);
@@ -82,6 +101,37 @@ public class ResourceManager {
 		return fileList;
 	}
 	public static String classPath() {
+		return classPaths()[0];
+	}
+	public static String[] classPaths() {
+		if(classPath == null) {
+			synchronized (ResourceManager.class) {
+				Vector<String> temp = new Vector<>();
+				StackTraceElement[] stacks = new RuntimeException().getStackTrace();
+				Class<?> mainClass = null;
+				for(StackTraceElement stack : stacks) {
+					if(stack.getMethodName() == "main") {
+						try {
+							mainClass = Class.forName(stack.getClassName());
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				if(mainClass != null) {
+					temp.add(getClassPath(mainClass)[0]);
+				}
+				ClassLoader loader = Thread.currentThread().getContextClassLoader();
+				String path = null;
+				while(loader != null) {
+					path = loader.getResource("").getPath().replace("%20"," ");
+					if(!temp.contains(path))
+						temp.add(path);
+					loader = loader.getParent();
+				}
+				classPath = temp.toArray(new String[] {});
+			}
+		}
 		return classPath;
 	}
 	/**
@@ -118,20 +168,21 @@ public class ResourceManager {
 		}
 		return classPaths;
 	}
-	public static void switchClassPath(Class<?> contextClass) {
+	public static void addClassPath(Class<?>... contextClass) {
 		Assert.isNull(contextClass, "content class is null");
+		if(contextClass == null || contextClass.length == 0) 
+			return;
 		synchronized (ResourceManager.class) {
-			classPath = getClassPath(contextClass)[0];
-		}
-	}
-	public static void switchClassPathIfNotExist(Class<?> contextClass) {
-		try {
-			Assert.isNotNull(contextClass);
-			synchronized (ResourceManager.class) {
-				classPath = getClassPath(contextClass)[0];
+			String strs[] = getClassPath(contextClass);
+			String[] template;
+			for(String str : strs) {
+				if(Arrays.binarySearch(classPath, str) < 0) {
+					template = new String[classPath.length+1];
+					System.arraycopy(classPath, 0, template, 0, classPath.length);
+					template[classPath.length] = str;
+					classPath = template;
+				}
 			}
-		}catch(AssertNotNullException t) {
-			
 		}
 	}
 }
