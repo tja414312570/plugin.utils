@@ -9,32 +9,40 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.YaNan.frame.utils.reflect.ClassLoader;
+import com.YaNan.frame.utils.reflect.AppClassLoader;
 
+/**
+ * 一个工具用于提供字符串相关操作
+ * @author yanan
+ *
+ */
 public class StringUtil {
 	public static int maxTimes = 10;
+	//资源缓存
 	private static Map<Integer, Boolean> resourceCache = new HashMap<Integer, Boolean>();
+	//token缓存，用于存储token性质的变量
 	private static Map<String, List<Token>> tokenCache = new HashMap<String, List<Token>>();
 
 	/**
-	 * 将对象中的变量填充到字符串啊的表达式中
+	 * 将对象中的变量填充到字符串中的表达式中
+	 * 例如 'hello ${name}, my age is ${age};' + {age=15,name="plu"} ==》 'hello plu, my age is 15';
 	 * 
-	 * @param str
-	 * @param obj
-	 * @return
+	 * @param str express
+	 * @param obj value
+	 * @return 替换后的内容
 	 */
 	public static String decodeVar(String str, Object obj) {
 		Pattern var = Pattern.compile("\\$\\{(\\w|_)+\\}");
 		Pattern reVar = Pattern.compile("\\$\\{|\\}");
 		Matcher m = var.matcher(str);
-		ClassLoader loader = new ClassLoader(obj);
+		AppClassLoader loader = new AppClassLoader(obj);
 		int i = 0;
 		while (m.find()) {
 			i++;
 			String result = m.group();
 			Matcher mA = reVar.matcher(result);
 			String field = mA.replaceAll("");
-			if (loader.hasMethod(ClassLoader.createFieldGetMethod(field))) {
+			if (loader.hasMethod(AppClassLoader.createFieldGetMethod(field))) {
 				try {
 					result = (String) loader.get(field);
 				} catch (SecurityException | IllegalArgumentException | IllegalAccessException
@@ -42,6 +50,31 @@ public class StringUtil {
 					e.printStackTrace();
 				}
 			}
+			str = str.substring(0, m.start()) + result + str.substring(m.end());
+			m = var.matcher(str);
+			if (i > maxTimes)
+				break;
+		}
+		return str;
+	}
+	/**
+	 * 将集合中的变量填充到字符串中的表达式中
+	 * 例如 'hello ${name}, my age is ${age};' + {age=15,name="plu"}  ==》 'hello plu, my age is 15';
+	 * @param str express
+	 * @param obj value
+	 * @return 替换后的内容
+	 */
+	public static String decodeVar(String str, Map<?,?> obj) {
+		Pattern var = Pattern.compile("\\$\\{(\\w|_)+\\}");
+		Pattern reVar = Pattern.compile("\\$\\{|\\}");
+		Matcher m = var.matcher(str);
+		int i = 0;
+		while (m.find()) {
+			i++;
+			String result = m.group();
+			Matcher mA = reVar.matcher(result);
+			String field = mA.replaceAll("");
+			result = (String) obj.get(field);
 			str = str.substring(0, m.start()) + result + str.substring(m.end());
 			m = var.matcher(str);
 			if (i > maxTimes)
@@ -57,13 +90,18 @@ public class StringUtil {
 	public static void setMaxTimes(int maxTimes) {
 		StringUtil.maxTimes = maxTimes;
 	}
-
-	public static String multi(int size, String string) {
-		String temp = "";
+	/**
+	 * 将字符串复制n份
+	 * @param size 复制的份数
+	 * @param str 要复制的内容
+	 * @return 处理后的字符
+	 */
+	public static String multi(int size, String str) {
+		StringBuilder temp = new StringBuilder();
 		for (int i = 0; i < size; i++) {
-			temp += string;
+			temp.append(str);
 		}
-		return temp;
+		return temp.toString();
 	}
 
 	// 问号匹配
@@ -79,11 +117,9 @@ public class StringUtil {
 	/**
 	 * 任意字符匹配,使用缓存，建议当匹配内容很少变化 与 表达式 很少变化时使用，否则一定要使用match
 	 * 
-	 * @param src
-	 *            要匹配的字符
-	 * @param regex
-	 *            要匹配的表达式
-	 * @return
+	 * @param src 要匹配的字符
+	 * @param regex 要匹配的表达式
+	 * @return 是否匹配
 	 */
 	public static boolean matchAndCache(String src, String regex) {
 		int hash = hash(src, regex);
@@ -98,11 +134,9 @@ public class StringUtil {
 	/**
 	 * 任意字符匹配,不使用缓存
 	 * 
-	 * @param src
-	 *            要匹配的字符
-	 * @param regex
-	 *            要匹配的表达式
-	 * @return
+	 * @param src 要匹配的字符
+	 * @param regex 要匹配的表达式
+	 * @return 是否匹配
 	 */
 	public static boolean match(String src, String regex) {
 		// 对*? 或 *? 进行处理，默认替换为*
@@ -196,11 +230,9 @@ public class StringUtil {
 	/**
 	 * 任意字符匹配,不使用缓存
 	 * 
-	 * @param src
-	 *            要匹配的字符
-	 * @param regex
-	 *            要匹配的表达式
-	 * @return
+	 * @param src 要匹配的字符
+	 * @param regex 要匹配的表达式
+	 * @return 是否匹配
 	 */
 	public static boolean matchURI(String src, String regex) {
 		// 对*? 或 *? 进行处理，默认替换为*
@@ -416,14 +448,25 @@ public class StringUtil {
 		}
 		}
 	}
-
+	/**
+	 * 获取字符数组的hash值
+	 * @param objects 字符数组
+	 * @return 计算后的hash值
+	 */
 	public static int hash(String... objects) {
-		int hash = 0;
-		for (int i = 0; i < objects.length; i++)
-			hash += objects[i].hashCode();
+		int hash = 0;String now;
+		for (int i = 0; i < objects.length; i++) {
+			 now = objects[i];
+			 hash += now == null ? 1 << i : objects[i].hashCode();
+		}
 		return hash;
 	}
-
+	/**
+	 * 判断字符和表达式是否匹配
+	 * @param src 源字符串
+	 * @param regs 表达式数组
+	 * @return 是否有匹配
+	 */
 	public static boolean match(String src, String[] regs) {
 		for (String reg : regs)
 			if (match(src, reg))
@@ -433,10 +476,9 @@ public class StringUtil {
 
 	/**
 	 * 重组基础变量，后面依次为参数位置
-	 * 
-	 * @param src
-	 * @param arguments
-	 * @return
+	 * @param src 字符表达式
+	 * @param arguments 参数数组
+	 * @return 解析后的字符
 	 */
 	public static String decodeBaseVar(String src, Object... arguments) {
 		StringBuilder sb = new StringBuilder(src);
@@ -446,7 +488,16 @@ public class StringUtil {
 					.append(sb.substring(sb.indexOf("}", index + 1) + 1));
 		return sb.toString();
 	}
-
+	/**
+	 * 找到字符表达式中的变量名称，并将原始位置替换为目标字符
+	 * 其中数组最后一条为替换后的内容
+	 * 'select * from table where id = ${var1}','${','}','?' ==》 [var1 , select * from table where id = ?]
+	 * @param regex 字符串表达式
+	 * @param prefix 前缀
+	 * @param suffix 后缀
+	 * @param replace 代替的类容
+	 * @return 数据的变量的集合
+	 */
 	public static List<String> find(String regex, String prefix, String suffix, String replace) {
 		List<String> result = new ArrayList<String>();
 		StringBuffer buffer = new StringBuffer("");
@@ -467,7 +518,13 @@ public class StringUtil {
 		}
 		return result;
 	}
-
+	/**
+	 * 找到字符串表达式中的表达式
+	 * @param regex 表达式
+	 * @param prefix 前缀
+	 * @param suffix 后缀
+	 * @return 变量的集合
+	 */
 	public static List<String> find(String regex, String prefix, String suffix) {
 		List<String> result = new ArrayList<String>();
 		if (regex != null) {
@@ -482,14 +539,19 @@ public class StringUtil {
 		}
 		return result;
 	}
-
-	public static List<String> findAllVars(String str, String... strings) {
+	/**
+	 * 找出表达式中指定类型的占位符的变量名称，比如,'abc${def}ghi#{jkl}','#{ }','${ }','{{ }}' ==》 'def','jkl'
+	 * @param str 表达式
+	 * @param fixArrays 占位符的数组，比如'#{ }','${ }','{{ }}'
+	 * @return 变量的集合
+	 */
+	public static List<String> findAllVars(String str, String... fixArrays) {
 		List<String> result = new ArrayList<String>();
-		if (str != null && strings != null && strings.length > 0) {
+		if (str != null && fixArrays != null && fixArrays.length > 0) {
 			String suffix = "";
 			String prefix = "";
 			int index = Integer.MAX_VALUE;
-			for (String reg : strings) {
+			for (String reg : fixArrays) {
 				String[] fixs = reg.split(" ");
 				if (fixs.length < 2)
 					throw new RuntimeException("express \"" + reg + "\" could not found suffix");
@@ -506,7 +568,7 @@ public class StringUtil {
 				if (!result.contains(stmp))
 					result.add(stmp);
 				index = Integer.MAX_VALUE;
-				for (String reg : strings) {
+				for (String reg : fixArrays) {
 					String[] fixs = reg.split(" ");
 					if (fixs.length < 2)
 						throw new RuntimeException("express \"" + reg + "\" could not found suffix");
@@ -523,7 +585,13 @@ public class StringUtil {
 		}
 		return result;
 	}
-
+	/**
+	 * 匹配表达式，并将占位符填入表达式
+	 * @param res 表达式
+	 * @param tokens 令牌集合
+	 * @param variable 变量列表
+	 * @return  是否匹配
+	 */
 	public static boolean match(String res, List<Token> tokens, Map<Integer, Token> variable) {
 		Iterator<Token> iterator = tokens.iterator();
 		Token nT;
@@ -608,8 +676,8 @@ public class StringUtil {
 	}
 	/**
 	 * 将表达式生成token
-	 * @param reg
-	 * @return
+	 * @param express string express
+	 * @return token list
 	 */
 	public static List<Token> getToken(String express) {
 		List<Token> tokens = tokenCache.get(express);
@@ -669,7 +737,10 @@ public class StringUtil {
 		}
 		return tokens;
 	}
-
+	/**
+	 * 该类用来标记匹配的字符的信息，该信息包含位置信息，匹配变量名称，匹配后的值等
+	 * @author yanan
+	 */
 	public static class Token {
 		private int index;
 		private String token;
@@ -743,5 +814,46 @@ public class StringUtil {
     }
 	public static boolean isNotBlank(final CharSequence cs) {
         return !isBlank(cs);
+    }
+	 /**
+     * <p>Compares two CharSequences, returning {@code true} if they represent
+     * equal sequences of characters.</p>
+     *
+     * <p>{@code null}s are handled without exceptions. Two {@code null}
+     * references are considered to be equal. The comparison is <strong>case sensitive</strong>.</p>
+     *
+     * <pre>
+     * StringUtils.equals(null, null)   = true
+     * StringUtils.equals(null, "abc")  = false
+     * StringUtils.equals("abc", null)  = false
+     * StringUtils.equals("abc", "abc") = true
+     * StringUtils.equals("abc", "ABC") = false
+     * </pre>
+     *
+     * @param cs1  the first CharSequence
+     * @param cs2  the second CharSequence
+     * @return if the CharSequences are equal (case-sensitive), or both null
+     */
+    public static boolean equals(final CharSequence cs1, final CharSequence cs2) {
+        if (cs1 == cs2) {
+            return true;
+        }
+        if (cs1 == null || cs2 == null) {
+            return false;
+        }
+        if (cs1.length() != cs2.length()) {
+            return false;
+        }
+        if (cs1 instanceof String && cs2 instanceof String) {
+            return cs1.equals(cs2);
+        }
+        // Step-wise comparison
+        final int length = cs1.length();
+        for (int i = 0; i < length; i++) {
+            if (cs1.charAt(i) != cs2.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

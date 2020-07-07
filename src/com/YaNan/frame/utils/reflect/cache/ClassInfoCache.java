@@ -20,8 +20,8 @@ public class ClassInfoCache {
 //	}
 	/**
 	 * 获取一个类的ClassHelper
-	 * @param clzz
-	 * @return
+	 * @param clzz target class
+	 * @return class helper
 	 */
 	public static ClassHelper getClassHelper(Class<?> clzz){
 		if(classCache.get(clzz)!=null)

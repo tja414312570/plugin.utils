@@ -16,7 +16,6 @@ import java.io.OutputStreamWriter;
  * Files 类
  * @version 1.0.1
  * @since jdk1.7
- * @enCoding UTF-8
  * @author YaNan
  *
  */
@@ -48,46 +47,28 @@ public class FileUtils {
 
 	/**
 	 * Files类 调用此类你将可以更简便的操作文本文件
-	 * <p>
 	 * 如果你实例化此类后没有使用参数，你需要先对该类进行赋值
-	 * <p>
 	 * 例如: 1 Files file = new Files();
-	 * <p>
 	 * file.File = new File("test.txt");
-	 * <p>
 	 * file.write("hello files");
-	 * <p>
 	 * 2 Files file = new File();
-	 * <p>
 	 * file.File = new Files("test.txt");
-	 * <p>
 	 * file.fileContent = "hello files";
-	 * <p>
 	 * file.write();
-	 * 
-	 * @see {@link #Files(String)}
-	 * @see {@link #Files(File)}
 	 */
 	public FileUtils() {
 	}
 
 	/**
 	 * Files类 需要传入一个String型的filePath 调用此类你将可以更简便的操作文本文件
-	 * <p>
 	 * 如果你实例化此类后没有使用参数，你需要先对该类进行赋值
-	 * <p>
 	 * 例如: 1 Files file = new Files("test.txt");
-	 * <p>
 	 * file.write("hello files");
-	 * <p>
 	 * 2 Files file = new Files("test.txt");
-	 * <p>
 	 * file.fileContent = "hello files";
-	 * <p>
 	 * file.write();
 	 * 
-	 * @see {@link #Files()}
-	 * @see {@link #Files(File)}
+	 * @param file String:file path
 	 */
 	public FileUtils(String file) {
 		this.filePath = file;
@@ -95,21 +76,14 @@ public class FileUtils {
 
 	/**
 	 * Files类 需要传入一个File型的filePath 调用此类你将可以更简便的操作文本文件
-	 * <p>
 	 * 如果你实例化此类后没有使用参数，你需要先对该类进行赋值
-	 * <p>
 	 * 例如: 1 Files file = new Files(new File("test.txt"));
-	 * <p>
 	 * file.write("hello files");
-	 * <p>
 	 * 2 Files file = new Files(new File("test.txt"));
-	 * <p>
 	 * file.fileContent = "hello files";
-	 * <p>
 	 * file.write();
 	 * 
-	 * @see {@link #Files()}
-	 * @see {@link #Files(String)}
+	 * @param file File:file
 	 */
 	public FileUtils(File file) {
 		this.file = file;
@@ -117,18 +91,14 @@ public class FileUtils {
 
 	/**
 	 * prepend文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，fileContent否则抛出空指针
-	 * <p>
 	 * prepend()
 	 * 
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prepend(String)}
-	 * @see {@link #prepend(File, String)}
-	 * @see {@link #prepend(String, String)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean prepend() throws Exception {
+	public boolean prepend() throws IllegalAccessException, IOException{
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.fileContent == null)
@@ -142,18 +112,15 @@ public class FileUtils {
 
 	/**
 	 * prepend文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * prepend(String fileContent)
 	 * 
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prepend()}
-	 * @see {@link #prepend(File, String)}
-	 * @see {@link #prepend(String, String)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean prepend(String fileContent) throws Exception {
+	public boolean prepend(String fileContent) throws IllegalAccessException, IOException{
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (fileContent == null)
@@ -167,71 +134,76 @@ public class FileUtils {
 
 	/**
 	 * prepend文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * 
-	 * <p>
 	 * prepend(String fileName||filePath,String fileContent)
 	 * 
+	 * @param fileName file name
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prepend()}
-	 * @see {@link #prepend(String)}
-	 * @see {@link #prepend(File, String)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean prepend(String fileName, String fileContent)
-			throws Exception {
+	public boolean prepend(String fileName, String fileContent) throws IllegalAccessException, IOException{
 		return prepend(new File(fileName), fileContent);
 	}
 
 	/**
 	 * prepend文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * prepend(File fileName||filePath,String fileContent)
 	 * 
+	 * @param file file
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prepend()}
-	 * @see {@link #prepend(String)}
-	 * @see {@link #prepend(String, String)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean prepend(File file, String fileContent) throws Exception {
+	public boolean prepend(File file, String fileContent) throws IOException, IllegalAccessException{
 		if (file == null)
 			throw new NullPointerException();
 		if (fileContent == null)
 			throw new NullPointerException();
-		if (!file.canRead())
-			throw new fileException("Cann,t read the file");
+		if (!file.canWrite())
+			throw new IllegalAccessException("Cann,t write the file");
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null ;
+		BufferedWriter bf = null;
 		try {
 			fileContent = fileContent
 					+ (read(file).equals("") ? "" : read(file));
-			FileOutputStream fos = new FileOutputStream(file);
-			OutputStreamWriter osw = new OutputStreamWriter(fos, fileEncoding);
-			BufferedWriter bf = new BufferedWriter(osw);
+			fos = new FileOutputStream(file);
+			osw = new OutputStreamWriter(fos, fileEncoding);
+			bf = new BufferedWriter(osw);
 			bf.write(fileContent);
-			bf.close();
-			osw.close();
-			fos.close();
-		} catch (IOException e) {
-			throw new fileException(e);
+		} finally {
+			if(bf != null)
+				try {
+					bf.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if(osw != null)
+				try {
+					osw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if(fos != null)
+				fos.close();
 		}
 		return true;
 	}
 
 	/**
 	 * prependLn文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，fileContent否则抛出空指针
-	 * <p>
 	 * prependLn()
 	 * 
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prependLn(String)}
-	 * @see {@link #prependLn(File, String)}
-	 * @see {@link #prependLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean prependLn() throws Exception {
+	public boolean prependLn() throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.fileContent == null)
@@ -245,18 +217,16 @@ public class FileUtils {
 
 	/**
 	 * prependLn文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * prependLn(String fileContent)
 	 * 
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prependLn()}
-	 * @see {@link #prependLn(File, String)}
-	 * @see {@link #prependLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean prependLn(String fileContent) throws Exception {
+	public boolean prependLn(String fileContent) throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (fileContent == null)
@@ -270,71 +240,86 @@ public class FileUtils {
 
 	/**
 	 * prepend文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * 
-	 * <p>
 	 * prependLn(String fileName||filePath,String fileContent)
 	 * 
+	 * @param fileName file name
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prependLn()}
-	 * @see {@link #prependLn(String)}
-	 * @see {@link #prependLn(File, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean prependLn(String fileName, String fileContent)
-			throws Exception {
+	public boolean prependLn(String fileName, String fileContent) throws IllegalAccessException, FileException, IOException{
 		return prependLn(new File(fileName), fileContent);
 	}
 
 	/**
 	 * prependLn文件写入，以文本形式写入文件,且写入的内容在原内容之前，默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * prependLn(File fileName||filePath,String fileContent)
 	 * 
+	 * @param file file
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #prependLn()}
-	 * @see {@link #prependLn(String)}
-	 * @see {@link #prependLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean prependLn(File file, String fileContent) throws Exception {
+	public boolean prependLn(File file, String fileContent) throws FileException, IllegalAccessException, IOException{
 		if (file == null)
 			throw new NullPointerException();
 		if (fileContent == null)
 			throw new NullPointerException();
 		if (!file.canRead())
-			throw new fileException("Cann,t read the file");
+			throw new FileException("Cann,t read the file");
+		BufferedWriter bf = null;
+		FileOutputStream fos = null;
+		OutputStreamWriter osw = null;
 		try {
 			fileContent = fileContent
 					+ (read(file).equals("") ? "" : "\n" + read(file));
-			FileOutputStream fos = new FileOutputStream(file);
-			OutputStreamWriter osw = new OutputStreamWriter(fos, fileEncoding);
-			BufferedWriter bf = new BufferedWriter(osw);
+			fos = new FileOutputStream(file);
+			osw = new OutputStreamWriter(fos, fileEncoding);
+			bf = new BufferedWriter(osw);
 			bf.write(fileContent);
-			bf.close();
-			osw.close();
-			fos.close();
-		} catch (IOException e) {
-			throw new fileException(e);
+			
+		} finally {
+			if(bf != null)
+				try {
+					bf.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if(osw != null)
+				try {
+					osw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if(fos != null)
+				try {
+					fos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return true;
 	}
 
 	/**
 	 * reWrite文件覆写，以文本形式覆写文件,默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，fileContent，否则抛出空指针
-	 * <p>
 	 * reWrite()
 	 * 
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #reWrite(String)}
-	 * @see {@link #reWrite(File, String)}
-	 * @see {@link #reWrite(String, String)}
+	 * @throws IOException ex
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean reWrite() throws Exception {
+	public boolean reWrite() throws IllegalAccessException, FileException, IOException{
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.fileContent == null)
@@ -348,18 +333,16 @@ public class FileUtils {
 
 	/**
 	 * reWrite文件覆写，以文本形式覆写文件,默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * reWrite(String content)
 	 * 
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #reWrite()}
-	 * @see {@link #reWrite(File, String)}
-	 * @see {@link #reWrite(String, String)}
+	 * @throws IOException ex
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean reWrite(String fileContent) throws Exception {
+	public boolean reWrite(String fileContent) throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.filePath != null)
@@ -371,76 +354,93 @@ public class FileUtils {
 
 	/**
 	 * reWrite文件覆写，以文本形式覆写文件,默认编码为utf-8
-	 * <p>
 	 * reWrite(File fileName||filePath,String content)
 	 * 
+	 * @param file file
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #reWrite()}
-	 * @see {@link #reWrite(String)}
-	 * @see {@link #reWrite(String, String)}
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
+	 * @throws FileException ex
 	 */
-	public boolean reWrite(File file, String fileContent) throws Exception {
+	public boolean reWrite(File file, String fileContent) throws IllegalAccessException, IOException, FileException {
 		if (!file.exists()) {
 			if (!file.canRead())
-				throw new fileException("Cann,t read the file");
+				throw new IllegalAccessException("Cann,t read the file");
 			try {
 				if (this.notExistsCreate) {
 					file.createNewFile();
 					write(file, fileContent);
 				} else {
-					throw new fileException("File is't exists");
+					throw new FileException("File is't exists");
 				}
 			} catch (IOException e) {
-				throw new fileException(e.toString());
+				throw new FileException(e.toString());
 			}
 		} else {
+			FileOutputStream fos = null;
+			OutputStreamWriter osw = null;
+			BufferedWriter bf = null;
 			try {
-				FileOutputStream fos = new FileOutputStream(file);
-				OutputStreamWriter osw = new OutputStreamWriter(fos,
+				fos = new FileOutputStream(file);
+				osw = new OutputStreamWriter(fos,
 						fileEncoding);
-				BufferedWriter bf = new BufferedWriter(osw);
+				bf = new BufferedWriter(osw);
 				bf.write(fileContent);
-				bf.close();
-				osw.close();
-				fos.close();
-			} catch (IOException e) {
-				throw new fileException(e);
-			}
+			} finally {
+				if(bf != null)
+					try {
+						bf.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				if(osw != null)
+					try {
+						osw.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				if(fos != null)
+					try {
+						fos.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			} 
 		}
 		return true;
 	}
 
 	/**
 	 * reWrite文件覆写，以文本形式覆写文件,默认编码为utf-8
-	 * <p>
 	 * reWrite(String fileName||filePath,String content)
 	 * 
+	 * @param filePath file path
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #reWrite()}
-	 * @see {@link #reWrite(String)}
-	 * @see {@link #reWrite(File, String)}
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
+	 * @throws FileException ex
 	 */
-	public boolean reWrite(String filePath, String fileContent)
-			throws Exception {
+	public boolean reWrite(String filePath, String fileContent) throws IllegalAccessException, FileException, IOException{
 		return reWrite(new File(filePath), fileContent);
 	}
 
 	/**
 	 * write文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，fileContent，否则抛出空指针
-	 * <p>
 	 * write()
 	 * 
 	 * @return boolean:true or false
 	 * @return true or false
-	 * @see {@link #write(String)}
-	 * @see {@link #write(File, String)}
-	 * @see {@link #write(String, String)}
+	 * @throws IOException ex
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean write() throws Exception {
+	public boolean write() throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.fileContent == null)
@@ -454,18 +454,16 @@ public class FileUtils {
 
 	/**
 	 * write文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
 	 * write(String content)
 	 * 
+	 * @param fileContent file content
 	 * @return boolean:true or false
-	 * @return true or false
-	 * @see {@link #write()}
-	 * @see {@link #write(File, String)}
-	 * @see {@link #write(String, String)}
+	 * @throws IOException es
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean write(String fileContent) throws Exception {
+	public boolean write(String fileContent) throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.filePath != null)
@@ -477,44 +475,61 @@ public class FileUtils {
 
 	/**
 	 * write文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * write(File fileName||filePath,String content)
 	 * 
+	 * @param file File file
+	 * @param fileContent String file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #write()}
-	 * @see {@link #write(String)}
-	 * @see {@link #write(String, String)}
+	 * @throws IllegalAccessException ex
+	 * @throws FileException ex
+	 * @throws IOException ex
 	 */
-	public boolean write(File file, String fileContent) throws Exception {
+	public boolean write(File file, String fileContent) throws IllegalAccessException, FileException, IOException {
 		if (!file.exists()) {
 			if (!file.canWrite())
-				throw new fileException("Cann,t Write the file");
+				throw new IllegalAccessException("Cann,t Write the file");
 			try {
 				if (this.notExistsCreate) {
 					file.createNewFile();
 					write(file, fileContent);
 				} else {
-					throw new fileException("File is't exists");
+					throw new FileException("File is't exists");
 				}
 			} catch (IOException e) {
-				throw new fileException(e.toString());
+				throw new FileException(e.toString());
 			}
 		} else {
+			FileOutputStream fos = null;
+			OutputStreamWriter osw = null;
+			BufferedWriter bf = null;
 			try {
 				fileContent = (read(file).equals("") ? "" : read(file)
 						+ (this.autoCR ? "\r\n" : ""))
 						+ fileContent;
-				FileOutputStream fos = new FileOutputStream(file);
-				OutputStreamWriter osw = new OutputStreamWriter(fos,
+				fos = new FileOutputStream(file);
+				osw = new OutputStreamWriter(fos,
 						fileEncoding);
-				BufferedWriter bf = new BufferedWriter(osw);
+				bf = new BufferedWriter(osw);
 				bf.write(fileContent);
-				bf.close();
-				osw.close();
-				fos.close();
-			} catch (IOException e) {
-				throw new fileException(e);
+			} finally {
+				if(bf != null)
+					try {
+						bf.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				if(osw != null)
+					try {
+						osw.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				if(fos != null)
+					try {
+						fos.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 			}
 		}
 		return true;
@@ -522,33 +537,30 @@ public class FileUtils {
 
 	/**
 	 * write文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * write(String fileName||filePath,String content)
-	 * 
+	 * @param filePath String:file path
+	 * @param fileContent String:file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #write()}
-	 * @see {@link #write(String)}
-	 * @see {@link #write(File, String)}
+	 * @throws IOException ex
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public boolean write(String filePath, String fileContent) throws Exception {
+	public boolean write(String filePath, String fileContent) throws IllegalAccessException, FileException, IOException {
 		return write(new File(filePath), fileContent);
 	}
 
 	/**
 	 * writeLn文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * 调用此方法需要先设置file或filePath，fileContent，否则抛出空指针
-	 * <p>
 	 * writeLn()
 	 * 
 	 * @return boolean:true or false
 	 * @return true or false
-	 * @see {@link #writeLn(String)}
-	 * @see {@link #writeLn(File, String)}
-	 * @see {@link #writeLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean writeLn() throws Exception {
+	public boolean writeLn() throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.fileContent == null)
@@ -562,18 +574,18 @@ public class FileUtils {
 
 	/**
 	 * writeLn文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
+
 	 * 调用此方法需要先设置file或filePath，否则抛出空指针
-	 * <p>
+
 	 * writeLn(String content)
 	 * 
+	 * @param fileContent String:file content
 	 * @return boolean:true or false
-	 * @return true or false
-	 * @see {@link #writeLn()}
-	 * @see {@link #writeLn(File, String)}
-	 * @see {@link #writeLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean writeLn(String fileContent) throws Exception {
+	public boolean writeLn(String fileContent) throws IllegalAccessException, FileException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.filePath != null)
@@ -585,126 +597,160 @@ public class FileUtils {
 
 	/**
 	 * writeLn文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * writeLn(File fileName||filePath,String content)
 	 * 
+	 * @param file File:java.io.file
+	 * @param fileContent String:file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #writeLn()}
-	 * @see {@link #writeLn(String)}
-	 * @see {@link #writeLn(String, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean writeLn(File file, String fileContent) throws Exception {
+	public boolean writeLn(File file, String fileContent) throws FileException, IllegalAccessException, IOException{
 		if (!file.exists()) {
 			if (!file.canWrite())
-				throw new fileException("Cann,t Write the file");
+				throw new IllegalAccessException("Cann,t Write the file");
 			try {
 				if (this.notExistsCreate) {
 					file.createNewFile();
 					writeLn(file, fileContent);
 				} else {
-					throw new fileException("File is't exists");
+					throw new FileException("File is't exists");
 				}
 			} catch (IOException e) {
-				throw new fileException(e.toString());
+				throw new FileException(e.toString());
 			}
 		} else {
+			FileOutputStream fos = null;
+			OutputStreamWriter osw = null ;
+			BufferedWriter bf = null;
 			try {
 				fileContent = (read(file).equals("") ? "" : read(file)
 						+ (this.autoCR ? "\r\n" : ""))
 						+ fileContent;
-				FileOutputStream fos = new FileOutputStream(file);
-				OutputStreamWriter osw = new OutputStreamWriter(fos,
+				fos = new FileOutputStream(file);
+				osw = new OutputStreamWriter(fos,
 						fileEncoding);
-				BufferedWriter bf = new BufferedWriter(osw);
+				bf = new BufferedWriter(osw);
 				bf.write(fileContent);
-				bf.close();
-				osw.close();
-				fos.close();
-			} catch (IOException e) {
-				throw new fileException(e);
-			}
+			} finally {
+				if(bf != null)
+					try {
+						bf.close();
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+				if(osw != null)
+					try {
+						osw.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				if(fos != null)
+					try {
+						fos.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			} 
 		}
 		return true;
 	}
 
 	/**
 	 * writeLn文件写入，以文本形式写入文件,默认编码为utf-8
-	 * <p>
 	 * writeLn(String fileName||filePath,String content)
 	 * 
+	 * @param filePath String:file path
+	 * @param fileContent String:file content
 	 * @return boolean:true or false
-	 * @throws Exception
-	 * @see {@link #writeLn()}
-	 * @see {@link #writeLn(String)}
-	 * @see {@link #writeLn(File, String)}
+	 * @throws FileException ex
+	 * @throws IllegalAccessException ex
+	 * @throws IOException ex
 	 */
-	public boolean writeLn(String filePath, String fileContent)
-			throws Exception {
+	public boolean writeLn(String filePath, String fileContent) throws IllegalAccessException, FileException, IOException{
 		return writeLn(new File(filePath), fileContent);
 	}
 
 	/**
 	 * read文件读取，以文本形式读取文件,默认编码为utf-8
-	 * <p>
+
 	 * read(File fileName||filePath)
 	 * 
+	 * @param file File:file
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #read()}
-	 * @see {@link #read(String)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException  ex
 	 */
-	public String read(File fileName) throws Exception {
+	public String read(File file) throws IOException, IllegalAccessException{
 		StringBuffer strBuffer = new StringBuffer();
 		String strLine;
-		if (!fileName.exists())
-			throw new Exception("FileIsn'tExists");
-		;
-		if (!fileName.canRead())
-			throw new fileException("Cann,t read the file");
+		if (!file.exists())
+			throw new FileNotFoundException("FileIsn'tExists");
+		if (!file.canRead())
+			throw new IllegalAccessException("Cann,t read the file");
+		FileInputStream fis = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
 		try {
-			FileInputStream fis = new FileInputStream(fileName);
-			InputStreamReader isr = new InputStreamReader(fis, fileEncoding);
-			BufferedReader br = new BufferedReader(isr);
+			fis = new FileInputStream(file);
+			isr = new InputStreamReader(fis, fileEncoding);
+			br = new BufferedReader(isr);
 			while ((strLine = br.readLine()) != null) {
 				if (strBuffer.length() > 0)
 					strBuffer.append("\r\n");
 				strBuffer.append(strLine);
 			}
-			br.close();
-			isr.close();
-			fis.close();
-		} catch (IOException e) {
-			throw new fileException(e);
+		} finally  {
+			if(br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if(isr != null)
+				try {
+					isr.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if(fis != null)
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 		return strBuffer.toString();
 	}
 
 	/**
 	 * read文件读取，以文本形式读取文件,默认编码为utf-8
-	 * <p>
+
 	 * read(String fileName||filePath);
 	 * 
+	 * @param fileName String:file name
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #read()}
-	 * @see {@link #read(File)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public String read(String fileName) throws Exception {
+	public String read(String fileName) throws IllegalAccessException, IOException {
 		return read(new File(fileName));
 	}
 
 	/**
 	 * read文件读取，以文本形式读取文件,默认编码为utf-8
-	 * <p>
+
 	 * read();需要先设置file或filePath，否者抛出空指针
 	 * 
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #read(String)}
-	 * @see {@link #read(File)}
+	 * @throws IOException ex
+	 * @throws IllegalAccessException ex
 	 */
-	public String read() throws Exception {
+	public String read() throws IllegalAccessException, IOException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.filePath != null)
@@ -716,33 +762,28 @@ public class FileUtils {
 
 	/**
 	 * Attribute获取文件属性，以文本形式读取文件,默认编码为utf-8
-	 * <p>
 	 * Attribute();需要先设置file或filePath，否者抛出空指针
-	 * 
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #attribute(String)}
-	 * @see {@link #attribute(File)}
+	 * @throws IOException ex;
+	 * @throws FileException ex;
 	 */
-	public String attribute() throws IOException, fileException {
+	public String attribute() throws IOException, FileException {
 		if (this.filePath == null && this.file == null)
 			throw new NullPointerException();
 		if (this.filePath != null)
 			return attribute(this.filePath);
 		if (this.file != null)
 			return attribute(this.file);
-		throw new fileException("unKnow error");
+		throw new FileException("unKnow error");
 	}
 
 	/**
 	 * Attribute获取文件属性，以文本形式读取文件,默认编码为utf-8
-	 * <p>
 	 * Attribute(String fileName||filePath);针
 	 * 
+	 * @param fileName String:file name
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #attribute()}
-	 * @see {@link #attribute(File)}
+	 * @throws IOException ex
 	 */
 	public String attribute(String fileName) throws IOException {
 		return attribute(new File(fileName));
@@ -755,13 +796,11 @@ public class FileUtils {
 
 	/**
 	 * Attribute获取文件属性，以文本形式读取文件,默认编码为utf-8
-	 * <p>
 	 * Attribute(File fileName||filePath);需要先设置file或filePath，否者抛出空指针
 	 * 
 	 * @return String text or error message
-	 * @throws Exception
-	 * @see {@link #attribute(String)}
-	 * @see {@link #attribute()}
+	 * @throws IOException ex
+	 * @param file file
 	 */
 	@SuppressWarnings("deprecation")
 	public String attribute(File file) throws IOException {

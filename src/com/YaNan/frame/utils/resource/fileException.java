@@ -1,29 +1,29 @@
 package com.YaNan.frame.utils.resource;
 
-public class fileException extends Exception {
+public class FileException extends Exception {
 	private static final long serialVersionUID = 414312570L;
 
 	/**
-	 * Constructs an {@code fileException} with {@code null} as its error detail
+	 * Constructs an {@code FileException} with {@code null} as its error detail
 	 * message.
 	 */
-	public fileException() {
+	public FileException() {
 		super();
 	}
 
 	/**
-	 * Constructs an {@code fileException} with the specified detail message.
+	 * Constructs an {@code FileException} with the specified detail message.
 	 *
 	 * @param message
 	 *            The detail message (which is saved for later retrieval by the
 	 *            {@link #getMessage()} method)
 	 */
-	public fileException(String message) {
+	public FileException(String message) {
 		super(message);
 	}
 
 	/**
-	 * Constructs an {@code fileException} with the specified detail message and
+	 * Constructs an {@code FileException} with the specified detail message and
 	 * cause.
 	 *
 	 * <p>
@@ -40,12 +40,12 @@ public class fileException extends Exception {
 	 *            indicates that the cause is nonexistent or unknown.)
 	 *
 	 */
-	public fileException(String message, Throwable cause) {
+	public FileException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
-	 * Constructs an {@code fileException} with the specified cause and a detail
+	 * Constructs an {@code FileException} with the specified cause and a detail
 	 * message of {@code (cause==null ? null : cause.toString())} (which
 	 * typically contains the class and detail message of {@code cause}). This
 	 * constructor is useful for IO exceptions that are little more than
@@ -57,7 +57,7 @@ public class fileException extends Exception {
 	 *            indicates that the cause is nonexistent or unknown.)
 	 *
 	 */
-	public fileException(Throwable cause) {
+	public FileException(Throwable cause) {
 		super(cause);
 	}
 }

@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.YaNan.frame.utils.asserts.Assert;
 
 import java.util.Set;
+
+import com.YaNan.frame.utils.asserts.Assert;
 
 /**
  * ant style path matcher
@@ -36,7 +37,7 @@ public class PathMatcher {
 	private boolean result;
 	/**
 	 * 创建一个ant path matcher的表达式解析
-	 * @param express
+	 * @param express path express
 	 */
 	public PathMatcher(String express){
 		this.express = express;
@@ -52,8 +53,8 @@ public class PathMatcher {
 	}
 	/**
 	 * 获取一个ant path matcher的表达式解析
-	 * @param express
-	 * @return
+	 * @param express the path express
+	 * @return path matcher
 	 */
 	public static PathMatcher getPathMatcher(String express) {
 		PathMatcher pathMatcher = tokensCache.get(express);
@@ -69,8 +70,9 @@ public class PathMatcher {
 	/**
 	 * 将表达式生成token
 	 * 
-	 * @param reg
-	 * @return
+	 * @param express path express
+	 * @param point a token mark
+	 * @return token list
 	 */
 	public static List<Token> buildToken(String express,int point) {
 		int last = 0;
@@ -494,7 +496,7 @@ iterator: while (index < express.length()) {
 		}
 		/**
 		 * 获取变量的集合
-		 * @return
+		 * @return a set for variable entry
 		 */
 		public  Set<Entry<String, String>> variableSet(){
 			if(this.variables==null) {
@@ -510,8 +512,8 @@ iterator: while (index < express.length()) {
 		}
 		/**
 		 * 获取匹配到的变量
-		 * @param varName
-		 * @return
+		 * @param varName variable name
+		 * @return variable value
 		 */
 		public String getVariable(String varName){
 			if(this.variables==null) {

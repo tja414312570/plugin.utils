@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 /**
  * @version 1.0.1
  * @since jdk1.7
- * @enCoding UTF-8
  * @author YaNan
  *
  */

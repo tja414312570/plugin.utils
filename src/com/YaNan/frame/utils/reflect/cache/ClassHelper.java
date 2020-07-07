@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 为程序在框架中方便高效调用反射提供缓存支持</br>
- * 作为{@link com.YaNan.frame.reflect.ClassLoader}的底层,为其提供访问Class文件缓存</br>
- * 支持获取Field,Method,Annotation等常用方法，和系统反射方法名相同</br>
- * 我们建议使用helper来获取Class文件的Field、Method等等信息。</br>
+ * 为程序在框架中方便高效调用反射提供缓存支持
+ * 作为{@link com.YaNan.frame.utils.reflect.AppClassLoader}的底层,为其提供访问Class文件缓存
+ * 支持获取Field,Method,Annotation等常用方法，和系统反射方法名相同
+ * 我们建议使用helper来获取Class文件的Field、Method等等信息。
  * @author yanan
  * 20181011 提供获取类及其父类中所有的Field，方法getAllFields();
  * 20181221 新增getClassHelper方法
@@ -99,8 +99,8 @@ public class ClassHelper {
 	/**
 	 * 获取所有的Field，包括该类所有Field及其父类所有的Field
 	 * 包括protected，private，public，default修饰的Field
-	 * @param endClass
-	 * @return
+	 * @param endClass the found end class default object.class
+	 * @return field array
 	 */
 	public Field[] getAllFields(Class<?> endClass){
 		if(endClass==null)
@@ -122,20 +122,13 @@ public class ClassHelper {
 	/**
 	 * 获取所有的Field，包括该类所有Field及其父类所有的Field
 	 * 包括protected，private，public，default修饰的Field
-	 * @return
+	 * @return filed array
 	 */
 	public Field[] getAllFields(){
 		if(this.allFields==null)
 			allFields = this.buildAllFields();
 		return this.allFields;
 	}
-	/**
-	 * 获取所有的Field，包括该类所有Field及其父类所有的Field
-	 * 包括protected，private，public，default修饰的Field
-	 * @param target
-	 * @param endClass
-	 * @return
-	 */
 	private Field[] buildAllFields(){
 		this.allFieldMap = new HashMap<String,Field>();
 		Class<?> endClass = Object.class;
@@ -174,8 +167,8 @@ public class ClassHelper {
 	}
 	/**
 	 * 获取一个Field，包括其父类包含的所有的Field
-	 * @param fieldName
-	 * @return
+	 * @param fieldName query field name
+	 * @return field
 	 */
 	public Field getAnyField(String fieldName){
 		if(this.allFieldMap==null) {
@@ -198,7 +191,7 @@ public class ClassHelper {
 	public Constructor<?> getDedlaredConstructor(Class<?>...parameterTypes){
 		return this.declaredConstructorMap.get(hash(parameterTypes));
 	}
-	/**
+	/*
 	 * 此部分用于获取Field method constructor的helper
 	 */
 	public Map<Field, FieldHelper> getFieldHelperMap(){

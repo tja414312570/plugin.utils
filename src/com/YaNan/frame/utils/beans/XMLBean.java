@@ -22,6 +22,7 @@ import org.dom4j.io.SAXReader;
  * @author YaNan
  * @version 20170326
  */
+@Deprecated
 public class XMLBean {
 	private List<File> fileList = new ArrayList<File>();
 	//
@@ -40,63 +41,104 @@ public class XMLBean {
 	private Map<String, Class<?>> mapMapping = new HashMap<String, Class<?>>();
 	// remove mapping
 	private List<String> removeNodes = new ArrayList<String>();
-
+	private int scanLevel = -1;
+	public Class<?> bean;
+	/**
+	 * get the xml scan level
+	 * @return xml scan level
+	 */
 	public int getScanLevel() {
 		return scanLevel;
 	}
-
+	/**
+	 * she the xml scan max level,if the value is negative ,the until while scan all level,default level is -1,
+	 * @param scanLevel scan level
+	 */
 	public void setScanLevel(int scanLevel) {
 		this.scanLevel = scanLevel;
 	}
-
-	private int scanLevel = -1;
-
+	/**
+	 * get current tools mapping class
+	 * @return mapping class
+	 */
 	public Class<?> getBeanClass() {
 		return beanClass;
 	}
-
+	/**
+	 * set current tools mapping class
+	 * @param beanClass mapping class
+	 */
 	public void setBeanClass(Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
-
+	/**
+	 * get current tools selected node name
+	 * @return node name
+	 */
 	public String getNodeName() {
 		return nodeName;
 	}
-
+	/**
+	 * set current tools node name
+	 * @param nodeName node name
+	 */
 	public void setNodeName(String nodeName) {
 		this.nodeName = nodeName;
 	}
-
-	public Class<?> bean;
-
+	/**
+	 * get bean class
+	 * @return bean class
+	 */
 	public Class<?> getBean() {
 		return bean;
 	}
-
+	/**
+	 * set bean class
+	 * @param cls bean class
+	 */
 	public void setBean(Class<?> cls) {
 		this.bean = cls;
 	}
-
+	/**
+	 * get current tools all file as list
+	 * @return file list
+	 */
 	public List<File> getfileList() {
 		return fileList;
 	}
-
+	/**
+	 * set current tools file list
+	 * @param fileList file list
+	 */
 	public void setfileList(List<File> fileList) {
 		this.fileList = fileList;
 	}
-
-	public void addXMLFile(File fileList) {
-		this.fileList.add(fileList);
+	/**
+	 * add file to current tools
+	 * @param file file
+	 */
+	public void addXMLFile(File file) {
+		this.fileList.add(file);
 	}
-
+	/**
+	 * get current tools read element path
+	 * @return element path list
+	 */
 	public List<String> getElementPath() {
 		return elementPath;
 	}
-
+	/**
+	 * add element path
+	 * @param elementPath element path
+	 */
 	public void addElementPath(String elementPath) {
 		this.elementPath.add(elementPath);
 	}
-
+	/**
+	 * execute decode tools for xml mapping to class
+	 * @param <T> any type
+	 * @return mapping bean
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> execute() {
 		// if XML fileList list is zero,throw exception and stop process
@@ -168,8 +210,10 @@ public class XMLBean {
 		return (List<T>) this.beanObjectList;
 
 	}
-
-	public void rootElement(Iterator<?> eIterator, List<Object> objectList) {
+	/*
+	 * iterator root element
+	 */
+	private void rootElement(Iterator<?> eIterator, List<Object> objectList) {
 		while (eIterator.hasNext()) {
 			// define a object , if the object is error while throw exception
 			// and return null
@@ -190,8 +234,10 @@ public class XMLBean {
 		}
 	}
 
-	// Element analysis
-	public void Element(Element beanElement, Object parentObject, int level) {
+	/*
+	 *  Element analysis
+	 */
+	private void Element(Element beanElement, Object parentObject, int level) {
 		// get every element all attribute Iterator
 		if (this.scanLevel > -1 && level++ >= this.scanLevel)
 			return;
@@ -227,8 +273,10 @@ public class XMLBean {
 		}
 	}
 
-	// Attribute analysis
-	public void Attribute(Element beanElement, Object object) {
+	/*
+	 *  Attribute analysis
+	 */
+	private void Attribute(Element beanElement, Object object) {
 		// if element has not value attribute,default set the value use element
 		// content
 		if (beanElement.attribute("value") == null && !beanElement.elementIterator().hasNext()) {
@@ -260,7 +308,7 @@ public class XMLBean {
 	}
 
 	// handle map filed
-	public void handleMap(Element element, String name, Object parentObject, int level) throws SecurityException {
+	private void handleMap(Element element, String name, Object parentObject, int level) throws SecurityException {
 		Class<?> cls = this.mapMapping.get(name);
 		Method method;
 		try {
@@ -277,9 +325,11 @@ public class XMLBean {
 		}
 
 	}
-
+	/*
+	 * support current tools to cast data type
+	 */
 	@SuppressWarnings("deprecation")
-	public static Object castType(Object orgin, Class<?> targetType) {
+    static Object castType(Object orgin, Class<?> targetType) {
 		// 整形
 		if (targetType.equals(int.class))
 			return Integer.parseInt(("" + orgin).equals("") ? "0" : "" + orgin);
@@ -315,14 +365,18 @@ public class XMLBean {
 	 * class,such as CLASS,you can use this method to Bind the class in the XML
 	 * document to the CLASS in the class file
 	 * 
-	 * @param xmlName
-	 * @param FieldName
+	 * @param xmlName xml tag name
+	 * @param fieldName class filed name
 	 */
-	public void addNameMaping(String str, String field) {
-		this.nameMapping.put(str, field);
+	public void addNameMaping(String xmlName, String fieldName) {
+		this.nameMapping.put(xmlName, fieldName);
 
 	}
-
+	/**
+	 * add type mapping to class
+	 * @param field field
+	 * @param cls class
+	 */
 	// Type mapping
 	public void addTypeMaping(String field, Class<?> cls) {
 		this.typeMapping.put(field, cls);
@@ -330,19 +384,22 @@ public class XMLBean {
 
 	// Map mapping
 	/**
-	 * 
-	 * @param string
-	 * @param cls
+	 * set tag mapping to class
+	 * @param name tag
+	 * @param cls mapping class
 	 */
-	public void addMapMapping(String string, Class<?> cls) {
-		this.mapMapping.put(string, cls);
+	public void addMapMapping(String name, Class<?> cls) {
+		this.mapMapping.put(name, cls);
+	}
+	/**
+	 * remove node
+	 * @param nodeName node name
+	 */
+	public void removeNode(String nodeName) {
+		this.removeNodes.add(nodeName);
 	}
 
-	public void removeNode(String field) {
-		this.removeNodes.add(field);
-	}
-
-	private void exception(Exception exception) {
+    private void exception(Exception exception) {
 		exception.printStackTrace();
 	}
 

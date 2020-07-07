@@ -24,6 +24,12 @@ public class ResourceManager {
 	final static String CLASSPATHS_EXPRESS = "classpath*:";
 	final static String PROJECT_EXPRESS = "project:";
 	static volatile String[] classPath;
+	/**
+	 * 根据路径表达式获取具体的路径
+	 * 比如classpath:返回/home/class
+	 * @param pathExpress 路径表达式
+	 * @return 具体的路径
+	 */
 	public static String[] getPathExress(String pathExpress){
 		if(pathExpress == null) {
 			throw new ResourcePathExpressException("path express is null");
@@ -49,16 +55,34 @@ public class ResourceManager {
 		}
 		return new String[]{pathExpress}; 
 	}
+	/**
+	 * 根据路径表达式数组返回具体的路径
+	 * @param pathExpressArray 路径表达式数组
+	 * @return 具体的路径
+	 */
+	public static String[] getPathExress(String[] pathExpressArray) {
+		Assert.isNull(pathExpressArray);
+		List<String> pathList = new ArrayList<>();
+		for(String pathExpress : pathExpressArray) {
+			String[] paths = getPathExress(pathExpress);
+			if(paths != null) {
+				for(String path : paths) {
+					pathList.add(path);
+				}
+			}
+		}
+		return pathList.toArray(new String[]{});
+	}
 	public static String projectPath() throws IOException {
 		return new File("").getCanonicalPath().replace("%20"," ");
 	}
 	/**
 	 * 通过路径表达式获取符合该路劲的所有资源
-	 * @param pathExpress
-	 * @return
+	 * @param pathExpress 路径表达式
+	 * @return 抽象资源列表
 	 */
-	public static List<AbstractResourceEntry> getResourceList(String pathExpresss){
-		String[] pathResults = getPathExress(pathExpresss);
+	public static List<AbstractResourceEntry> getResourceList(String pathExpress){
+		String[] pathResults = getPathExress(pathExpress);
 		List<AbstractResourceEntry> result = new ArrayList<AbstractResourceEntry>();
 		for(String pathResult : pathResults){
 			int index = pathResult.indexOf("*");
@@ -89,10 +113,18 @@ public class ResourceManager {
 		}
 		return result.stream().distinct().collect(Collectors.toList());
 	}
+	/**
+	 * 根据路径表达式获取一个资源
+	 * @param pathExpress 路径表达式
+	 * @return 抽象资源
+	 */
 	public static AbstractResourceEntry getResource(String pathExpress){
 		List<AbstractResourceEntry>  list = getResourceList(pathExpress);
 		return list == null || list.isEmpty() ? null : list.get(0);
 	}
+	/*
+	 * 获取匹配的资源，是获取抽象资源的具体实现
+	 */
 	private static List<AbstractResourceEntry> getMatchFile(String pathExpress,String regex) {
 		ResourceScanner path = new ResourceScanner(pathExpress);
 		path.filter(regex);
@@ -135,8 +167,8 @@ public class ResourceManager {
 		return classPath;
 	}
 	/**
-	 * @param name
-	 * @return
+	 * @param name String:express
+	 * @return the real path
 	 */
 	public static String getClassPath(String name) {
 		return name.replace("%20"," ").replace(ResourceManager.classPath(), "").replaceAll("/|\\\\", ".");
@@ -144,7 +176,7 @@ public class ResourceManager {
 	/**
 	 * get classpath by class file 
 	 * @param clzzs an array contains class all classpath
-	 * @return
+	 * @return class path array
 	 */
 	public static String[] getClassPath(Class<?>... clzzs) {
 		String[] classPaths = new String[clzzs.length];

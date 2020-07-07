@@ -2,6 +2,11 @@ package com.YaNan.frame.utils;
 
 import java.nio.ByteBuffer;
 
+/**
+ * 位处理工具
+ * @author yanan
+ *
+ */
 public class ByteUtils {
 	 /** 
 	   * int整数转换为4字节的byte数组 
