@@ -1,5 +1,6 @@
 package com.YaNan.frame.utils.reflect;
 
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +19,8 @@ import com.YaNan.frame.utils.reflect.cache.ClassInfoCache;
 
 /**
  * ClassLoader for YaNan.frame 该类加载器是YaNan应用的核心处理机制之一，用于对应用内部实体、类等的控制
+ * 新增独占模式:独占模式，完全为一个行的加载器，所有类只要能用此加载器加载的将强制以此加载器加载
+ * ！！启用独占模式后加载的类会和调用此加载器环境不一致，导致相同的类名有不同的hash，两个容器之间将不能传值
  * @author Administrator
  * @version 1.0.1
  * @author YaNan
@@ -28,6 +31,7 @@ public class AppClassLoader extends ClassLoader{
 	private Object loadObject;
 	private Class<?> loadClass;
 	private ClassHelper infoCache = null;
+	private boolean exclusive = false;
 	/**
 	 * get the class class helper info
 	 * @return class helper
@@ -35,7 +39,19 @@ public class AppClassLoader extends ClassLoader{
 	public ClassHelper getInfoCache() {
 		return infoCache;
 	}
-
+	/**
+	 * enable exclusive
+	 */
+	public void enableExclusive() {
+		this.exclusive = true;
+	}
+	/**
+	 * whether the loader is exclusive
+	 * @return boolean
+	 */
+	public boolean isExclusive() {
+		return exclusive;
+	}
 	/**
 	 * get the class loader loaded object
 	 * @return a object at this class loader
@@ -1353,6 +1369,34 @@ public class AppClassLoader extends ClassLoader{
 		this.loadClass = defineClass(clzzName, bytes, 0,bytes.length);
 		return this.loadClass;
 	}
+	//用于查找类
+	protected Class<?> loadClass(String name, boolean resolve)
+	        throws ClassNotFoundException
+	    {
+	        synchronized (getClassLoadingLock(name)) {
+	            // First, check if the class has already been loaded
+	            Class<?> c = findLoadedClass(name);
+	            if (c == null) {
+	            	//是否独占模式
+	            	if(this.exclusive) {
+	            		//获取二进制资源
+	            		ClassLoader parentLoader =  this.getParent();
+	            		InputStream is = parentLoader.getResourceAsStream(name.replace(".", "/")+".class");
+	            		byte[] bytes;
+	            		try {
+	            			bytes = new byte[is.available()];
+	            			is.read(bytes);
+	            			c = AppClassLoader.loadClass(name, bytes, this);
+	            		} catch (Throwable  e) {
+	            			c = super.loadClass(name, resolve);
+	            		}
+	            	}else {
+	            		c = super.loadClass(name, resolve);
+	            	}
+	            }
+	            return c;
+	        }
+	    }
 	/**
 	 * 获取field为List的泛型
 	 * @param field the field
