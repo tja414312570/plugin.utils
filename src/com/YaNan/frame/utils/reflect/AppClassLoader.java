@@ -1,6 +1,9 @@
 package com.YaNan.frame.utils.reflect;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +15,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.YaNan.frame.utils.PathMatcher;
 import com.YaNan.frame.utils.reflect.cache.ClassHelper;
 import com.YaNan.frame.utils.reflect.cache.ClassInfoCache;
 
@@ -32,12 +38,30 @@ public class AppClassLoader extends ClassLoader{
 	private Class<?> loadClass;
 	private ClassHelper infoCache = null;
 	private boolean exclusive = false;
+	private volatile Set<String> sharedClassMap;
+	private volatile Class<? extends Annotation> ClassLoaderSharedClass = null;
+	private volatile Class<? extends Annotation> ClassLoaderSharedInheritedClass = null;
 	/**
 	 * get the class class helper info
 	 * @return class helper
 	 */
 	public ClassHelper getInfoCache() {
 		return infoCache;
+	}
+	public void addShardClass(String name) {
+		if(this.sharedClassMap == null) {
+			synchronized (this) {
+				if(sharedClassMap == null)
+					sharedClassMap = new HashSet<>();
+			}
+		}
+		this.sharedClassMap.add(name);
+	}
+	public boolean hasShardClass(String name) {
+		return this.sharedClassMap != null &&this.sharedClassMap.contains(name);
+	}
+	public Set<String> getSharedClassMap(){
+		return this.sharedClassMap;
 	}
 	/**
 	 * enable exclusive
@@ -795,6 +819,8 @@ public class AppClassLoader extends ClassLoader{
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		Method method = ClassInfoCache.getClassHelper(clzz).getMethod(methodName, getParameterBaseType(args));
+		if(method == null)
+			throw new NoSuchMethodException();
 		return method.invoke(null, args);
 	}
 
@@ -816,6 +842,8 @@ public class AppClassLoader extends ClassLoader{
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		Method method = ClassInfoCache.getClassHelper(clzz).getMethod(methodName, parameterTypes);
+		if(method == null)
+			throw new NoSuchMethodException();
 		return method.invoke(null, args);
 	}
 
@@ -1369,6 +1397,14 @@ public class AppClassLoader extends ClassLoader{
 		this.loadClass = defineClass(clzzName, bytes, 0,bytes.length);
 		return this.loadClass;
 	}
+	public boolean matchSharedMap(String name) {
+		if(this.sharedClassMap != null)
+		for(String c :this.sharedClassMap) {
+			if(PathMatcher.match(c, name).isMatch())
+				return true;
+		}
+		return false;
+	}
 	//用于查找类
 	protected Class<?> loadClass(String name, boolean resolve)
 	        throws ClassNotFoundException
@@ -1378,18 +1414,50 @@ public class AppClassLoader extends ClassLoader{
 	            Class<?> c = findLoadedClass(name);
 	            if (c == null) {
 	            	//是否独占模式
-	            	if(this.exclusive) {
+	            	if(this.exclusive && !matchSharedMap(name)) {
+//	            		if((ClassLoaderSharedClass == null || ClassLoaderSharedInheritedClass == null)
+//	            				&& (!name.equals(ClassLoaderShared.class.getName()) && !name.equals(ClassLoaderSharedInherited.class.getName()))
+//	            				 && !name.startsWith("java")) {
+//	            			ClassLoaderSharedClass = (Class<? extends Annotation>) loadClass(ClassLoaderShared.class.getName(), resolve);
+//	            			ClassLoaderSharedInheritedClass = (Class<? extends Annotation>) loadClass(ClassLoaderSharedInherited.class.getName(), resolve);
+//	            		}
 	            		//获取二进制资源
 	            		ClassLoader parentLoader =  this.getParent();
-	            		InputStream is = parentLoader.getResourceAsStream(name.replace(".", "/")+".class");
-	            		byte[] bytes;
+	            		int len = -1;
+	            		InputStream is = null;
+	            		ByteArrayOutputStream baos = null;
 	            		try {
-	            			bytes = new byte[is.available()];
-	            			is.read(bytes);
-	            			c = AppClassLoader.loadClass(name, bytes, this);
+	            			is = parentLoader.getResourceAsStream(name.replace(".", "/")+".class");
+	            			len = is.available();
+	            			baos = new ByteArrayOutputStream();
+	            			while((len = is.read() )!= -1) {
+	            				baos.write(len);
+	            			}
+	            			c = AppClassLoader.loadClass(name, baos.toByteArray(), this);
+//	            			if(c.getAnnotation(ClassLoaderSharedClass) != null 
+//	            					|| c.getAnnotation(ClassLoaderSharedClass) != null) {
+//	            				c = super.loadClass(name, resolve);
+//	            			}
 	            		} catch (Throwable  e) {
+	            			if(e.getLocalizedMessage()!= null && !e.getLocalizedMessage().contains("java")) {
+		            			e.printStackTrace();
+	            			}
 	            			c = super.loadClass(name, resolve);
-	            		}
+	            		}finally {
+							if(is != null)
+								try {
+									is.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							if(baos != null) {
+								try {
+									baos.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
 	            	}else {
 	            		c = super.loadClass(name, resolve);
 	            	}
@@ -1460,7 +1528,7 @@ public class AppClassLoader extends ClassLoader{
 			return resultClass;
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
-			throw new RuntimeException("failed to load class by "+ncLoader,e);
+			throw new RuntimeException("failed to load class ["+clzzName+"] by "+ncLoader,e);
 		}
 	}
 	@Override
