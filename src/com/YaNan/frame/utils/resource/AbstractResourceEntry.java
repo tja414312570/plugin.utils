@@ -12,7 +12,7 @@ import java.util.jar.JarEntry;
 import com.YaNan.frame.utils.StringUtil;
 import com.YaNan.frame.utils.asserts.Assert;
 
-public class AbstractResourceEntry{
+public class AbstractResourceEntry implements Resource{
 	/**
 	 * 资源类型 jar ，file
 	 * @author yanan
