@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -943,23 +944,23 @@ public class AppClassLoader extends ClassLoader{
 	 * @param source from object
 	 */
 	public static void DisClone(Object target, Object source) {
-		Field[] fields = target.getClass().getDeclaredFields();
+		Field[] fields = ClassHelper.getClassHelper(source.getClass()).getAllFields();
 		Class<?> sCls = source.getClass();
-		try {
 			for (Field f : fields) {
 				Field sField = null;
 				try {
 					sField = sCls.getDeclaredField(f.getName());
-				} catch (NoSuchFieldException e1) {
-					continue;
+					sField.setAccessible(true);
+					f.setAccessible(true);
+					f.set(target, sField.get(source));
+				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+					e.printStackTrace();
+				}finally {
+					if(sField != null)
+						sField.setAccessible(false);
 				}
-				sField.setAccessible(true);
-				f.setAccessible(true);
-				f.set(target, sField.get(source));
 			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
 	/**
