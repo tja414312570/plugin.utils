@@ -79,11 +79,11 @@ public class PackageScanner {
 				continue;
 			if(packDir.indexOf(":")!=-1||packDir.startsWith("/")) {
 				int fiIndex = packDir.lastIndexOf("/");
-				int stIndex = packDir.indexOf("!");
-				int packMark = packDir.indexOf(".",stIndex>fiIndex?stIndex:fiIndex);
-				if(packMark!=-1) {
-					sourcePath = packDir.substring(0,packMark);//资源目录
-					packagePathName = packDir.substring(packMark);
+//				int stIndex = packDir.indexOf("!");
+//				int packMark = packDir.indexOf(".",stIndex>fiIndex?stIndex:fiIndex);
+				if(fiIndex!=-1) {
+					sourcePath = packDir.substring(0,fiIndex);//资源目录
+					packagePathName = packDir.substring(fiIndex);
 				}else {
 					sourcePath = packDir;//资源目录
 					packagePathName = "";
@@ -113,13 +113,13 @@ public class PackageScanner {
 		scanner.scanner(new ResourceInter(){
 			@Override
 			public void find(AbstractResourceEntry resourceEntry) {
-				if(resourceEntry.getName().endsWith(".class")){
-					String className = resourceEntry.getPath().replace(resourcePath, "").replace("\\","." ).replace("/", ".").replace("$", ".").replace(".class", "");
+				if(resourceEntry.getName().endsWith(".class") && resourceEntry.getName().indexOf("$") == -1){
+					String className = resourceEntry.getPath().replace(resourcePath, "").replace("\\","." ).replace("/", ".").replace(".class", "");
 					className= className.substring(0, 1).equals(".")?className.substring(1, className.length()):className;
 					try {
 						inter.find(Class.forName(className));
 					} catch (Throwable e) {
-						if(!ignoreLoadingException&&!e.getClass().equals(ClassNotFoundException.class))
+						if(!ignoreLoadingException)
 							throw new RuntimeException("failed to load class \""+className+"\" at class file \""+resourceEntry.getPath()+"\"",e);
 					}
 				}

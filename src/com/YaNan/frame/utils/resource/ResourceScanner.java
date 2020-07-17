@@ -37,7 +37,7 @@ public class ResourceScanner {
 	public ResourceScanner(String source) {
 		int index = source.indexOf("!");
 		if(index>-1) {
-			this.filter.add(source+"**");
+//			this.filter.add(source+"**");
 			source = source.substring(0,index);
 		}
 		// 添加事件
