@@ -32,7 +32,7 @@ public interface Resource {
 	 * get resource available data size
 	 * @return the resource available stream length
 	 */
-	long size();
+	long size() throws IOException;
 	/**
 	 * if the resource is direct ,use the method get all list
 	 * @return return the resource list 
