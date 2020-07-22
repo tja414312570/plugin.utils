@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.tja414312570</groupId>
   <artifactId>plugin.utils</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>config</name>
   <description>Plugin tools,support reflect,resource,Xml decode,logger</description>
   <parent>

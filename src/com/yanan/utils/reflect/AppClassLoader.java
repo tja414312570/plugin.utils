@@ -4,10 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -18,6 +20,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.yanan.utils.UnsafeUtils;
 import com.yanan.utils.reflect.cache.ClassHelper;
 import com.yanan.utils.reflect.cache.ClassInfoCache;
 import com.yanan.utils.string.PathMatcher;
@@ -953,13 +956,69 @@ public class AppClassLoader extends ClassLoader{
 					f.setAccessible(true);
 					f.set(target, sField.get(source));
 				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-					e.printStackTrace();
+//					e.printStackTrace();
 				}finally {
 					if(sField != null)
 						sField.setAccessible(false);
 				}
 			}
 		
+	}
+	/**
+	 * 深度克隆
+	 * @param target
+	 * @param source
+	 */
+	public static void deepClone(Object target,Object source) {
+		Field[] fields = ClassHelper.getClassHelper(source.getClass()).getAllFields();
+		Class<?> sCls = source.getClass();
+			for (Field f : fields) {
+				Field sField = null;
+				try {
+					sField =ClassHelper.getClassHelper(sCls).getAnyField(f.getName());
+					sField.setAccessible(true);
+					Object targetFieldObj = sField.get(source);
+					if(targetFieldObj == null)
+						continue;
+					f.setAccessible(true);
+					if(f.getType().isArray()) {
+						int len = Array.getLength(targetFieldObj);
+						targetFieldObj = Array.newInstance(f.getType(),len );
+						for (int i = 0; i < len; i++) {
+							Object element = Array.get(targetFieldObj, i);
+							if(element!= null && !isBaseUnwrapperType(element.getClass())&& !Modifier.isFinal(element.getClass().getModifiers())){
+								deepClone(element.getClass(), element);
+							}
+							Array.set(targetFieldObj, i,element);
+						}
+					}else {
+						if(!isBaseUnwrapperType(f.getType()) && f.getAnnotation(ShallowClone.class) == null
+								&& !Modifier.isFinal(f.getType().getModifiers())) {
+							 targetFieldObj = deepClone(targetFieldObj.getClass(), targetFieldObj);
+						}
+					}
+					f.set(target,targetFieldObj);
+				} catch (IllegalArgumentException | IllegalAccessException | SecurityException | InstantiationException e) {
+					e.printStackTrace();
+				}finally {
+					if(sField != null)
+						sField.setAccessible(false);
+				}
+			}
+	}
+	@SuppressWarnings({ "restriction", "unchecked" })
+	public static <T> T deepClone(Class<T> targetClass,Object source) throws InstantiationException {
+		if(source == null)
+			return null;
+		T object;
+		
+		try {
+			object = targetClass.newInstance();
+		}catch (Throwable e) {
+			object = (T) UnsafeUtils.getUnsafe().allocateInstance(targetClass);
+		}
+		deepClone(object, source);
+		return object;
 	}
 	
 	/**
@@ -1028,7 +1087,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public static boolean implementsOf(Class<?> orginClass, Class<?> interfaceClass) {
 		Class<?> tempClass = orginClass;
-		while (tempClass != null && !tempClass.equals(Object.class)) {
+		while (tempClass != null) {
 			if (tempClass.equals(interfaceClass)) {
 				return true;
 			}
@@ -1039,9 +1098,6 @@ public class AppClassLoader extends ClassLoader{
 				}
 			}
 			tempClass = tempClass.getSuperclass();
-			if(tempClass == null) {
-				break;
-			}
 		}
 		return false;
 	}
@@ -1063,14 +1119,11 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public static boolean extendsOf(Class<?> orginClass, Class<?> parentClass) {
 		Class<?> tempClass = orginClass;
-		while (!tempClass.equals(Object.class)) {
+		while (tempClass != null) {
 			if (tempClass.equals(parentClass)) {
 				return true;
 			}
 			tempClass = tempClass.getSuperclass();
-			if(tempClass == null) {
-				break;
-			}
 		}
 		return false;
 	}
@@ -1281,7 +1334,33 @@ public class AppClassLoader extends ClassLoader{
 			return true;
 		return false;
 	}
-
+	/**
+	 * 判断类是否为可支持的基本无包裹类型
+	 * 
+	 * @param clzz judge class
+	 * @return whether 
+	 */
+	public static boolean isBaseUnwrapperType(Class<?> clzz) {
+		if (clzz.equals(String.class))
+			return true;
+		if (clzz.equals(boolean.class))
+			return true;
+		if (clzz.equals(int.class))
+			return true;
+		if (clzz.equals(float.class))
+			return true;
+		if (clzz.equals(byte.class))
+			return true;
+		if (clzz.equals(short.class))
+			return true;
+		if (clzz.equals(long.class))
+			return true;
+		if (clzz.equals(double.class))
+			return true;
+		if (clzz.equals(char.class))
+			return true;
+		return false;
+	}
 	/**
 	 * 将字符类型转换为目标类型
 	 * 
