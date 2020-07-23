@@ -3,7 +3,6 @@ package com.yanan.utils.reflect;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.yanan.utils.UnsafeUtils;
 import com.yanan.utils.reflect.cache.ClassHelper;
@@ -37,13 +37,19 @@ import com.yanan.utils.string.PathMatcher;
  */
 public class AppClassLoader extends ClassLoader{
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final Consumer<Throwable> IGNORE_EXCEPTION_FUNCTION = new Consumer<Throwable>() {
+		@Override
+		public void accept(Throwable t) {
+			
+		}
+	};
 	private Object loadObject;
 	private Class<?> loadClass;
 	private ClassHelper infoCache = null;
 	private boolean exclusive = false;
 	private volatile Set<String> sharedClassMap;
-	private volatile Class<? extends Annotation> ClassLoaderSharedClass = null;
-	private volatile Class<? extends Annotation> ClassLoaderSharedInheritedClass = null;
+//	private volatile Class<? extends Annotation> ClassLoaderSharedClass = null;
+//	private volatile Class<? extends Annotation> ClassLoaderSharedInheritedClass = null;
 	/**
 	 * get the class class helper info
 	 * @return class helper
@@ -945,24 +951,35 @@ public class AppClassLoader extends ClassLoader{
 	 * @param target to object
 	 * @param source from object
 	 */
-	public static void DisClone(Object target, Object source) {
-		Field[] fields = ClassHelper.getClassHelper(source.getClass()).getAllFields();
-		Class<?> sCls = source.getClass();
+	public static void DisClone(Object target, Object source){
+		DisClone(target, source, IGNORE_EXCEPTION_FUNCTION);
+	}
+	/**
+	 * 跨对象复制对象，复制规则为相同的属性
+	 * @param target to object
+	 * @param source from object
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	public static void DisClone(Object target, Object source,Consumer<Throwable> consumer){
+		ClassHelper helper = ClassHelper.getClassHelper(source.getClass());
+		Field[] fields = helper.getAllFields();
 			for (Field f : fields) {
 				Field sField = null;
 				try {
-					sField = sCls.getDeclaredField(f.getName());
+					sField = helper.getAnyField(f.getName());
+					if(sField == null)
+						continue;
 					sField.setAccessible(true);
 					f.setAccessible(true);
 					f.set(target, sField.get(source));
-				} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
-//					e.printStackTrace();
+				} catch (Throwable e) {
+					consumer.accept(e);
 				}finally {
 					if(sField != null)
 						sField.setAccessible(false);
 				}
 			}
-		
 	}
 	/**
 	 * 深度克隆
@@ -1011,7 +1028,6 @@ public class AppClassLoader extends ClassLoader{
 		if(source == null)
 			return null;
 		T object;
-		
 		try {
 			object = targetClass.newInstance();
 		}catch (Throwable e) {
