@@ -1,17 +1,7 @@
 package utils;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
-
-import com.YaNan.frame.utils.resource.AbstractResourceEntry;
-import com.YaNan.frame.utils.resource.PackageScanner;
-import com.YaNan.frame.utils.resource.ResourceManager;
-import com.YaNan.frame.utils.resource.ResourceScanner;
-import com.YaNan.frame.utils.resource.ResourceScanner.ResourceInter;
+import com.yanan.utils.resource.AbstractResourceEntry;
+import com.yanan.utils.resource.ResourceManager;
 
 //file:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/rt.jar!/java/util/jar/JarFile.class
 public class JarTest {

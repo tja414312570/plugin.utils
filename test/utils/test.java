@@ -1,10 +1,7 @@
 package utils;
 
-import com.YaNan.frame.utils.PathMatcher;
-import com.YaNan.frame.utils.PathMatcher.Token;
-import com.YaNan.frame.utils.resource.PackageScanner;
-import com.YaNan.frame.utils.resource.PackageScanner.ClassInter;
-import com.YaNan.frame.utils.resource.ResourceManager;
+import com.yanan.utils.string.PathMatcher;
+import com.yanan.utils.string.PathMatcher.Token;
 
 public class test {
 	public static void main(String[] args) {

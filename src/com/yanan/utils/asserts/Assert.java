@@ -122,12 +122,12 @@ public class Assert {
 	}
 	/**
 	 * assert the class is equals such class arrays
-	 * @param object
-	 * @param classs
-	 * @return
+	 * @param object ori
+	 * @param targets targets
+	 * @return is equeals one
 	 */
-	public static boolean equalsAny(Class<?> object, Class<?>... classs) {
-		for(Class<?> clzz : classs) {
+	public static boolean equalsAny(Object object, Object... targets) {
+		for(Object clzz : targets) {
 			if(clzz.equals(object)) {
 				return true;
 			}

@@ -1,6 +1,5 @@
 package com.yanan.utils.resource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,6 +30,7 @@ public interface Resource {
 	/**
 	 * get resource available data size
 	 * @return the resource available stream length
+	 * @throws IOException ex
 	 */
 	long size() throws IOException;
 	/**
@@ -41,12 +41,13 @@ public interface Resource {
 	/**
 	 * get the resource out stream 
 	 * @return os
-	 * @throws FileNotFoundException ex
+	 * @throws IOException ex
 	 */
 	public OutputStream getOutputStream() throws IOException;
 	/**
 	 * get the resource input stream
 	 * @return input stream
+	 * @throws IOException ex
 	 */
 	public InputStream getInputStream() throws IOException;
 	/**

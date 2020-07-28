@@ -659,6 +659,7 @@ public class FileUtils {
 	 * read(File fileName||filePath)
 	 * 
 	 * @param file File:file
+	 * @param fileEncoding file encoding
 	 * @return String text or error message
 	 * @throws IOException            ex
 	 * @throws IllegalAccessException ex

@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
  * TypeToken 用于获取泛型的具体类型
  * @author yanan
  *
- * @param <T>
+ * @param <T> the generic type
  */
 public class TypeToken<T> {
 	private Type type;

@@ -856,4 +856,22 @@ public class StringUtil {
         }
         return true;
     }
+    /**
+     * 查找字符串位置
+     * @param src 原字符
+     * @param target 目标字符
+     * @return 位置
+     */
+	public static int indexOf(String src, String target) {
+		return src == null ? -1 : src.indexOf(target);
+	}
+	/**
+	 * 判断字符串是否包含某字符串
+	 * @param src 原字符
+	 * @param target 目标字符
+	 * @return 是否包含
+	 */
+	public static boolean contains(String src, String target) {
+		return indexOf(src, target) != -1;
+	}
 }

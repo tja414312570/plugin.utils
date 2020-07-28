@@ -52,7 +52,7 @@ public class CollectionUtils {
 	}
 	/**
 	 * 获取集合的长度
-	 * @param collection 集合
+	 * @param map 集合
 	 * @return 集合大小
 	 */
 	public static int getSize(final Map<?, ?> map) {

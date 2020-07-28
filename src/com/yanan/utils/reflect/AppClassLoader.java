@@ -958,8 +958,7 @@ public class AppClassLoader extends ClassLoader{
 	 * 跨对象复制对象，复制规则为相同的属性
 	 * @param target to object
 	 * @param source from object
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
+	 * @param consumer exception consumer
 	 */
 	public static void DisClone(Object target, Object source,Consumer<Throwable> consumer){
 		ClassHelper helper = ClassHelper.getClassHelper(source.getClass());
@@ -983,8 +982,8 @@ public class AppClassLoader extends ClassLoader{
 	}
 	/**
 	 * 深度克隆
-	 * @param target
-	 * @param source
+	 * @param target target object
+	 * @param source source object
 	 */
 	public static void deepClone(Object target,Object source) {
 		Field[] fields = ClassHelper.getClassHelper(source.getClass()).getAllFields();
