@@ -105,10 +105,8 @@ public class ResourceManager {
 				index = qndex;
 			if (index == -1) {
 				File file = new File(pathResult);
-				if (file.exists()) {
-					result.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(),
-							Type.FILE, file, null));
-				}
+				result.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(),
+						Type.FILE, file, null));
 				continue;
 //				Assert.isFalse(file.exists(),new ResourceNotFoundException("resource \"" +pathResult+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\""));
 //				return Arrays.asList();
