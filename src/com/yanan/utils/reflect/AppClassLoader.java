@@ -1632,4 +1632,16 @@ public class AppClassLoader extends ClassLoader{
 		//从线程加载加载资源
         return loader.loadClass(name);
     }
+	/**
+	 * 获取一个类的外部类
+	 * @param targetClass 寻找的目标类
+	 * @return 外部类
+	 * @throws ClassNotFoundException ex
+	 */
+	public static Class<?> getOuterClass(Class<?> targetClass) throws ClassNotFoundException {
+		String className = targetClass.getName();
+		className = className.substring(0,className.lastIndexOf('$'));
+		Class<?> outerClass = Class.forName(className);
+		return outerClass;
+	}
 }
