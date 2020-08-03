@@ -6,53 +6,68 @@ import java.io.OutputStream;
 import java.util.List;
 
 /**
- * 资源类，用于提供系统抽象资源
- * 定义一套统一资源api
+ * 资源类，用于提供系统抽象资源 定义一套统一资源api
+ * 
  * @author yanan
  *
  */
 public interface Resource {
 	/**
 	 * 获取资源的路径
+	 * 
 	 * @return the path
 	 */
 	String getPath();
+
 	/**
-	 * resource is direct
+	 * 判断资源是否是一个目录
+	 * 
 	 * @return is direct
 	 */
 	boolean isDirect();
+
 	/**
-	 * get the resource last modify time
+	 * 获取资源的最后的修改时间
+	 * 
 	 * @return the last modify time
 	 */
 	long lastModified();
+
 	/**
-	 * get resource available data size
+	 * 获取资源可用数据大小
+	 * 
 	 * @return the resource available stream length
 	 * @throws IOException ex
 	 */
 	long size() throws IOException;
+
 	/**
-	 * if the resource is direct ,use the method get all list
-	 * @return return the resource list 
+	 * 如果资源还有下级资源，则此方法列出所有下级资源
+	 * 
+	 * @return return the resource list
 	 */
 	List<? extends Resource> listResource();
+
 	/**
-	 * get the resource out stream 
+	 * 获取资源的输出流
+	 * 
 	 * @return os
 	 * @throws IOException ex
 	 */
 	public OutputStream getOutputStream() throws IOException;
+
 	/**
-	 * get the resource input stream
+	 * 获取资源输入流
+	 * 
 	 * @return input stream
 	 * @throws IOException ex
 	 */
 	public InputStream getInputStream() throws IOException;
+
 	/**
-	 * get the resource name
+	 * 获取资源名称
+	 * 
 	 * @return resource
 	 */
-	 String getName();
+	String getName();
 }

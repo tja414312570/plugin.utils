@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.jar.JarFile;
 
 import com.yanan.utils.asserts.Assert;
-import com.yanan.utils.resource.AbstractResourceEntry;
+import com.yanan.utils.resource.ClassPathResource;
+import com.yanan.utils.resource.FileResource;
+import com.yanan.utils.resource.Resource;
 import com.yanan.utils.string.PathMatcher;
 
 /*
@@ -43,12 +45,12 @@ public class ResourceScanner {
 		}
 		// 添加事件
 		File file = new File(source);
-		Assert.isFalse(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
+		Assert.isFalse(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 
 	public ResourceScanner(File file) {
-		Assert.isFalse(file.exists(),new RuntimeException("resource path invalid：" + file.toString()));
+		Assert.isFalse(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 
@@ -69,10 +71,10 @@ public class ResourceScanner {
 				if(fileNameIndex>-1) {
 					fileName = fileName.substring(fileNameIndex+1);
 				}
-				AbstractResourceEntry abstractResourceEntry = 
-						new AbstractResourceEntry(file.getAbsolutePath()+"!/"+jarEntry.getName(),fileName, this.
+				Resource abstractResourceEntry = 
+						new ClassPathResource(file.getAbsolutePath()+"!/"+jarEntry.getName(),fileName, this.
 								file.getAbsolutePath(), 
-								AbstractResourceEntry.Type.JAR, null, jarEntry);
+								jarEntry,Thread.currentThread().getContextClassLoader());
 				this.find(p,abstractResourceEntry);
 			});
 			jarFile.close();
@@ -91,12 +93,12 @@ public class ResourceScanner {
 				}
 			}
 		}
-		AbstractResourceEntry abstractResourceEntry = 
-			new AbstractResourceEntry(file.getPath(), file.getName(), this.file.getAbsolutePath(), AbstractResourceEntry.Type.FILE, file, null);
+		Resource abstractResourceEntry = 
+			new FileResource( this.file.getAbsolutePath(), file);
 		this.find(p,abstractResourceEntry);
 	}
 	
-	private void find(ResourceInter p, AbstractResourceEntry resource) {
+	private void find(ResourceInter p, Resource resource) {
 		if(filter.isEmpty()) {
 			p.find(resource);
 		}else { 
@@ -109,7 +111,7 @@ public class ResourceScanner {
 	}
 
 	public static interface ResourceInter {
-		public void find(AbstractResourceEntry resource);
+		public void find(Resource resource);
 	}
 
 	public void filter(String... strings) {

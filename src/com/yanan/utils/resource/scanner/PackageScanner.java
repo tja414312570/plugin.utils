@@ -4,7 +4,7 @@ package com.yanan.utils.resource.scanner;
 import java.io.File;
 import java.util.Arrays;
 
-import com.yanan.utils.resource.AbstractResourceEntry;
+import com.yanan.utils.resource.Resource;
 import com.yanan.utils.resource.ResourceManager;
 import com.yanan.utils.resource.scanner.ResourceScanner.ResourceInter;
 
@@ -113,7 +113,7 @@ public class PackageScanner {
 			scanner.filter(filter);
 		scanner.scanner(new ResourceInter(){
 			@Override
-			public void find(AbstractResourceEntry resourceEntry) {
+			public void find(Resource resourceEntry) {
 				if(resourceEntry.getName().endsWith(".class") && resourceEntry.getName().indexOf("$") == -1){
 					String className = resourceEntry.getPath().replace(resourcePath, "").replace("\\","." ).replace("/", ".").replace(".class", "");
 					className= className.substring(0, 1).equals(".")?className.substring(1, className.length()):className;

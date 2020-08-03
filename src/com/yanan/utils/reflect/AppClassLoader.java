@@ -9,13 +9,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -24,8 +17,6 @@ import com.yanan.utils.UnsafeUtils;
 import com.yanan.utils.reflect.cache.ClassHelper;
 import com.yanan.utils.reflect.cache.ClassInfoCache;
 import com.yanan.utils.string.PathMatcher;
-
-
 /**
  * ClassLoader for YaNan.frame 该类加载器是YaNan应用的核心处理机制之一，用于对应用内部实体、类等的控制
  * 新增独占模式:独占模式，完全为一个行的加载器，所有类只要能用此加载器加载的将强制以此加载器加载
@@ -36,27 +27,33 @@ import com.yanan.utils.string.PathMatcher;
  *
  */
 public class AppClassLoader extends ClassLoader{
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final Consumer<Throwable> IGNORE_EXCEPTION_FUNCTION = new Consumer<Throwable>() {
 		@Override
 		public void accept(Throwable t) {
 			
 		}
 	};
+	//操作的对象
 	private Object loadObject;
+	//操作的类
 	private Class<?> loadClass;
-	private ClassHelper infoCache = null;
+	//类信息缓存
+	private ClassHelper classHelper = null;
+	//独占模式
 	private boolean exclusive = false;
+	//共享类
 	private volatile Set<String> sharedClassMap;
-//	private volatile Class<? extends Annotation> ClassLoaderSharedClass = null;
-//	private volatile Class<? extends Annotation> ClassLoaderSharedInheritedClass = null;
 	/**
 	 * get the class class helper info
 	 * @return class helper
 	 */
-	public ClassHelper getInfoCache() {
-		return infoCache;
+	public ClassHelper getClassHelper() {
+		return classHelper;
 	}
+	/**
+	 * 添加共享类
+	 * @param name 共享类名
+	 */
 	public void addShardClass(String name) {
 		if(this.sharedClassMap == null) {
 			synchronized (this) {
@@ -66,9 +63,18 @@ public class AppClassLoader extends ClassLoader{
 		}
 		this.sharedClassMap.add(name);
 	}
+	/**
+	 * 判断共享类是否存在
+	 * @param name 名称
+	 * @return 是否有
+	 */
 	public boolean hasShardClass(String name) {
 		return this.sharedClassMap != null &&this.sharedClassMap.contains(name);
 	}
+	/**
+	 * 获取共享类映射
+	 * @return 共享类集合
+	 */
 	public Set<String> getSharedClassMap(){
 		return this.sharedClassMap;
 	}
@@ -99,200 +105,7 @@ public class AppClassLoader extends ClassLoader{
 	public void setLoadObject(Object loadObject) {
 		this.loadObject = loadObject;
 	}
-	/**
-	 * 判断类是否存在，参数 完整类名
-	 * 
-	 * @param className find the class name
-	 * @return boolean:is exists
-	 */
-	public static boolean exists(String className) {
-		try {
-			ClassInfoCache.classForName(className);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
 
-	/**
-	 * 获得类下所有公开的属性 传入 完整类名
-	 * 
-	 * @param className String:class name,the target class name
-	 * @return all public fields
-	 */
-	public static Field[] getFields(String className) {
-		try {
-			return ClassInfoCache.getClassHelper(ClassInfoCache.classForName(className)).getFields();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * 获得类下所有属性 参数 完整类名
-	 * 
-	 * @param className String:class name,the target class name
-	 * @return all declared filed at the current class
-	 */
-	public static Field[] getAllFields(String className) {
-		try {
-			return ClassInfoCache.getClassHelper(ClassInfoCache.classForName(className)).getDeclaredFields();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/**
-	 * 判断公开的方法是否存在，参数 完整类名，方法名，参数类型（可选）
-	 * 
-	 * @param className String:class name
-	 * @param methodName String:method name
-	 * @param args LClass arguments type array
-	 * @return boolean:is exists
-	 */
-	public static boolean hasMethod(String className, String methodName, Class<?>... args) {
-		try {
-			return ClassInfoCache.getClassHelper(ClassInfoCache.classForName(className)).getMethod(methodName,
-					args) != null;
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	/**
-	 * 判断方法是否存在，参数 完整类名，方法名，参数类型（可选）
-	 * 
-	 * @param className String:class name
-	 * @param methodName String:method name
-	 * @param args LClass arguments type array
-	 * @return boolean:is exists
-	 */
-	public static boolean hasDeclaredMethod(String className, String methodName, Class<?>... args) {
-		try {
-			return ClassInfoCache.getClassHelper(ClassInfoCache.classForName(className)).getMethod(methodName,
-					args) != null;
-		} catch (SecurityException | ClassNotFoundException e) {
-			return false;
-		}
-	}
-	/**
-	 * get the base type base on argument's values
-	 * @param args argument's
-	 * @return base type array
-	 */
-	public static Class<?>[] getParameterTypes(Object... args) {
-		Class<?>[] parmType = new Class[args.length];
-		for (int i = 0; i < args.length; i++)
-			parmType[i] = args[i]==null?null:args[i].getClass();
-		return parmType;
-	}
-	/**
-	 * get the base type base on argument's values
-	 * @param args argument's
-	 * @return base type array
-	 */
-	public static Class<?>[] getParameterBaseType(Object... args) {
-		Class<?>[] parmType = new Class<?>[args.length];
-		for (int i = 0; i < args.length; i++)
-			parmType[i] = patchBaseType(args[i]);
-		return parmType;
-	}
-
-	/**
-	 * 获取方法返回值类型
-	 * 
-	 * @param method the method
-	 * @return the method return type
-	 */
-	public static Class<?> getMethodReturnType(Method method) {
-		return method.getReturnType();
-	}
-
-	/**
-	 * 创建属性的get方法
-	 * 
-	 * @param field String:filed name
-	 * @return the method name for get filed
-	 */
-	public static String createFieldGetMethod(String field) {
-		return ClassInfoCache.getFieldGetMethod(field);
-	}
-	/**
-	 * 创建属性get方法
-	 * @param field Field:field
-	 * @return the method name for get field
-	 */
-	public static String createFieldGetMethod(Field field) {
-		return ClassInfoCache.getFieldGetMethod(field.getName());
-	}
-
-	/**
-	 * 创建属性的set方法
-	 * 
-	 * @param field String:field name
-	 * @return the method name for set field
-	 */
-	public static String createFieldSetMethod(String field) {
-		return ClassInfoCache.getFieldSetMethod(field);
-	}
-	/**
-	 * 创建属性set方法
-	 * @param field Field:field
-	 * @return the method name for set field
-	 */
-	public static String createFieldSetMethod(Field field) {
-		return ClassInfoCache.getFieldSetMethod(field.getName());
-	}
-
-	/**
-	 * 创建属性的add方法
-	 * 
-	 * @param name String:the field name
-	 * @return the field add method name
-	 */
-	public static String createFieldAddMethod(String name) {
-		return ClassInfoCache.getFieldAddMethod(name);
-	}
-
-	/**
-	 * 获取类的公开方法，传入String类名，String方法名，参数类型数组（可选）
-	 * 
-	 * @param cls Class the target class
-	 * @param methodName String:the method name
-	 * @param parameterTypes LClass the parameter types array
-	 * @return target method
-	 * @throws NoSuchMethodException ex
-	 */
-	public static Method getMethod(Class<?> cls, String methodName, Class<?>... parameterTypes)
-			throws NoSuchMethodException {
-		return ClassInfoCache.getClassHelper(cls).getMethod(methodName, parameterTypes);
-	}
-
-	/**
-	 * 获取类的方法，传入String类名，String方法名，参数类型数组（可选）
-	 * 
-	 * @param cls Class the target class
-	 * @param methodName String:the method name
-	 * @param parameterTypes LClass the parameter types array
-	 * @return target method
-	 * @throws NoSuchMethodException ex
-	 * @throws SecurityException ex
-	 */
-	public static Method getDeclaredMethod(Class<?> cls, String methodName, Class<?>... parameterTypes)
-			throws NoSuchMethodException, SecurityException {
-		return ClassInfoCache.getClassHelper(cls).getDeclaredMethod(methodName, parameterTypes);
-	}
-
-	/*
-	 * static method end
-	 */
-
-	/*
-	 * constructs start
-	 */
 	/**
 	 * 默认构造器，不传入任何参数，要使用请先调用loadClass或loadObjcet
 	 */
@@ -307,7 +120,7 @@ public class AppClassLoader extends ClassLoader{
 	public AppClassLoader(Object object) {
 		this.loadObject = object;
 		this.loadClass = this.loadObject.getClass();
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 	}
 
 	/**
@@ -317,7 +130,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public AppClassLoader(Class<?> cls) {
 		this.loadClass = cls;
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 		try {
 			this.loadObject = cls.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -334,7 +147,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public AppClassLoader(Class<?> cls, boolean instance) {
 		this.loadClass = cls;
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 		try {
 			if (instance)
 				this.loadObject = cls.newInstance();
@@ -356,7 +169,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public AppClassLoader(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		this.loadClass = Class.forName(className);
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 		this.loadObject = this.loadClass.newInstance();
 	}
 
@@ -374,7 +187,7 @@ public class AppClassLoader extends ClassLoader{
 	public AppClassLoader(String className, boolean instance)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		this.loadClass = Class.forName(className);
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 		if (instance)
 			this.loadObject = this.loadClass.newInstance();
 	}
@@ -398,7 +211,7 @@ public class AppClassLoader extends ClassLoader{
 			throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException,
 			SecurityException, IllegalArgumentException, InvocationTargetException {
 		this.loadClass = Class.forName(className);
-		this.infoCache = ClassInfoCache.getClassHelper(this.loadClass);
+		this.classHelper = ClassInfoCache.getClassHelper(this.loadClass);
 		if (args.length == 0) {
 			this.loadObject = this.loadClass.newInstance();
 		} else {
@@ -439,7 +252,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object Instance(Object... args) throws NoSuchMethodException, SecurityException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, InstantiationException {
-		Constructor<?> cls = this.infoCache.getConstructor(getParameterTypes(args));
+		Constructor<?> cls = this.classHelper.getConstructor(ParameterUtils.getParameterTypes(args));
 		this.loadObject = cls.newInstance(args);
 		return this.loadObject;
 	}
@@ -505,7 +318,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return the filed of loaded class
 	 */
 	public Field[] getFields() {
-		return this.infoCache.getFields();
+		return this.classHelper.getFields();
 	}
 
 	/**
@@ -514,7 +327,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return the declared field of loaded class
 	 */
 	public Field[] getDeclaredFields() {
-		return this.infoCache.getDeclaredFields();
+		return this.classHelper.getDeclaredFields();
 	}
 
 	/**
@@ -524,7 +337,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return boolean whether exists
 	 */
 	public boolean hasField(String field) {
-		return this.infoCache.getField(field) != null;
+		return this.classHelper.getField(field) != null;
 	}
 
 	/**
@@ -534,7 +347,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return boolean whether exists
 	 */
 	public boolean hasDeclaredField(String field) {
-		return this.infoCache.getDeclaredField(field) != null;
+		return this.classHelper.getDeclaredField(field) != null;
 	}
 
 	/**
@@ -545,9 +358,9 @@ public class AppClassLoader extends ClassLoader{
 	 * @throws IllegalAccessException ex
 	 */
 	public Object getFieldValue(String fieldName) throws IllegalAccessException {
-		Field field = this.infoCache.getField(fieldName);
+		Field field = this.classHelper.getField(fieldName);
 		if(field == null) 
-			field = this.infoCache.getDeclaredField(fieldName);
+			field = this.classHelper.getDeclaredField(fieldName);
 		return getFieldValue(field);
 	}
 
@@ -560,9 +373,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @throws IllegalAccessException ex
 	 */
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-		field.setAccessible(true);
-		Object result = field.get(this.loadObject);
-		return result;
+		return ReflectUtils.getFieldValue(field, loadObject);
 	}
 	/**
 	 * 获取加载器内加载的对象的属性值，传入String型属性名
@@ -576,7 +387,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object getDeclaredFieldValue(String fieldName)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		Field field = this.infoCache.getDeclaredField(fieldName);
+		Field field = this.classHelper.getDeclaredField(fieldName);
 		return getFieldValue(field);
 	}
 
@@ -588,7 +399,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @throws IllegalAccessException ex
 	 */
 	public void setFieldValue(String field, Object value) throws IllegalAccessException {
-		Field f = this.infoCache.getDeclaredField(field);
+		Field f = this.classHelper.getDeclaredField(field);
 		setFieldValue(f, value);
 	}
 	/**
@@ -602,7 +413,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public void setDeclaredFieldValue(String field, Object value)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		Field f = this.infoCache.getDeclaredField(field);
+		Field f = this.classHelper.getDeclaredField(field);
 		setFieldValue(f, value);
 	}
 
@@ -614,8 +425,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @throws IllegalAccessException ex
 	 */
 	public void setFieldValue(Field field, Object value) throws IllegalAccessException {
-		field.setAccessible(true);
-		field.set(this.loadObject, value);
+		ReflectUtils.setFieldValue(field, loadObject, value);
 	}
 
 	/*
@@ -651,13 +461,13 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public void set(Field field, Object arg) throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
-		String method = AppClassLoader.createFieldSetMethod(field);
+		String method = ReflectUtils.createFieldSetMethod(field);
 		if (this.hasMethod(method, field.getType())) {
 			Class<?>[] parameter = new Class<?>[1];
 			parameter[0] = field.getType();
-			invokeMethod(method, parameter, castType(arg, field.getType()));
+			invokeMethod(method, parameter, ParameterUtils.castType(arg, field.getType()));
 		} else {
-			setFieldValue(field, castType(arg, field.getType()));
+			setFieldValue(field, ParameterUtils.castType(arg, field.getType()));
 		}
 	}
 
@@ -677,7 +487,7 @@ public class AppClassLoader extends ClassLoader{
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Class<?>[] parameter = new Class<?>[1];
 		parameter[0] = parameterType;
-		invokeMethod(createFieldSetMethod(field), parameter, arg);
+		invokeMethod(ReflectUtils.createFieldSetMethod(field), parameter, arg);
 	}
 
 	/**
@@ -693,7 +503,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object get(String field) throws NoSuchMethodException, SecurityException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException {
-		String method = AppClassLoader.createFieldGetMethod(field);
+		String method = ClassInfoCache.getFieldGetMethod(field);
 		if (this.hasMethod(method)) {
 			return invokeMethod(method);
 		} else {
@@ -714,7 +524,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object get(Field field) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
-		String method = AppClassLoader.createFieldGetMethod(field);
+		String method = ClassInfoCache.getFieldGetMethod(field);
 		if (this.hasMethod(method)) {
 			return invokeMethod(method);
 		} else {
@@ -739,7 +549,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object invokeMethod(String methodName, Object... args) throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return invokeMethod(methodName, getParameterBaseType(args), args);
+		return invokeMethod(methodName, ParameterUtils.getParameterBaseType(args), args);
 	}
 
 	/**
@@ -776,9 +586,9 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object invokeMethod(Object object, String methodName, Class<?>[] parameterType, Object... args)
 			throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method method = this.infoCache.getMethod(methodName, parameterType);
+		Method method = this.classHelper.getMethod(methodName, parameterType);
 		if(method==null) {
-			method = this.infoCache.getDeclaredMethod(methodName, parameterType);
+			method = this.classHelper.getDeclaredMethod(methodName, parameterType);
 		}
 		if (method == null) {
 			StringBuilder ptStr = new StringBuilder(this.loadClass.getName()).append(".").append(methodName)
@@ -790,8 +600,7 @@ public class AppClassLoader extends ClassLoader{
 			}
 			throw new NoSuchMethodException(ptStr.append(")").toString());
 		}
-		method.setAccessible(true);
-		return method.invoke(object, args);
+		return ReflectUtils.invokeMethod(object, method, args);
 	}
 
 	/**
@@ -808,58 +617,9 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Object invokeStaticMethod(String methodName, Object... args) throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return invokeMethod(null, methodName, getParameterTypes(args), args);
+		return invokeMethod(null, methodName,  ParameterUtils.getParameterTypes(args), args);
 	}
 
-	/**
-	 * 调用加载器内加载对象的某个静态方法，传入String方法名，参数所需要的参数（可选）
-	 * 
-	 * @param clzz invoke class
-	 * @param methodName invoke method name
-	 * @param args invoke parameter
-	 * @return invoke result
-	 * @throws NoSuchMethodException ex
-	 * @throws SecurityException ex
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
-	 * @throws InvocationTargetException ex
-	 */
-	public static Object invokeStaticMethod(Class<?> clzz, String methodName, Object... args)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException {
-		Method method = ClassInfoCache.getClassHelper(clzz).getMethod(methodName, getParameterBaseType(args));
-		if(method == null)
-			throw new NoSuchMethodException();
-		return method.invoke(null, args);
-	}
-
-	/**
-	 * 调用加载器内加载对象的某个静态方法，传入String方法名，参数所需要的参数（可选）
-	 * 
-	 * @param clzz invoke class
-	 * @param methodName invoke method name
-	 * @param parameterTypes the invoke method parameter type
-	 * @param args invoke arguments
-	 * @return invoke result
-	 * @throws NoSuchMethodException ex
-	 * @throws SecurityException ex
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
-	 * @throws InvocationTargetException ex
-	 */
-	public static Object invokeStaticMethod(Class<?> clzz, String methodName, Class<?>[] parameterTypes, Object... args)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException {
-		Method method = ClassInfoCache.getClassHelper(clzz).getMethod(methodName, parameterTypes);
-		if(method == null)
-			throw new NoSuchMethodException();
-		return method.invoke(null, args);
-	}
-
-	/*
-	 * Method
-	 */
-	// get method
 	/**
 	 * 获得加载器内加载类的某个方法，传入String方法名，参数类型（可选）
 	 * 
@@ -871,7 +631,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public Method getDeclaredMethod(String method, Class<?>... parameterType)
 			throws NoSuchMethodException, SecurityException {
-		return this.infoCache.getDeclaredMethod(method, parameterType);
+		return this.classHelper.getDeclaredMethod(method, parameterType);
 	}
 
 	/**
@@ -882,7 +642,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return target method
 	 */
 	public Method getMethod(String method, Class<?>... parameterType){
-		return this.infoCache.getMethod(method, parameterType);
+		return this.classHelper.getMethod(method, parameterType);
 	}
 
 	/**
@@ -891,7 +651,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return all method array
 	 */
 	public Method[] getMethods() {
-		return this.infoCache.getMethods();
+		return this.classHelper.getMethods();
 	}
 
 	/**
@@ -900,7 +660,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return declared method array
 	 */
 	public Method[] getDeclaredMethods() {
-		return this.infoCache.getDeclaredMethods();
+		return this.classHelper.getDeclaredMethods();
 	}
 
 	// judge method
@@ -912,7 +672,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return whether exists target method
 	 */
 	public boolean hasDeclaredMethod(String method, Class<?>... parameterType) {
-		return this.infoCache.getDeclaredMethod(method, parameterType) != null;
+		return this.classHelper.getDeclaredMethod(method, parameterType) != null;
 	}
 
 	/**
@@ -923,7 +683,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return whether exists target method
 	 */
 	public boolean hasMethod(String method, Class<?>... parameterType) {
-		return this.infoCache.getMethod(method, parameterType) != null;
+		return this.classHelper.getMethod(method, parameterType) != null;
 	}
 	/**
 	 * 获取类的属性
@@ -931,7 +691,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return the filed 
 	 */
 	public Field getDeclaredField(String field) {
-		return this.infoCache.getDeclaredField(field);
+		return this.classHelper.getDeclaredField(field);
 	}
 	/**
 	 * clone object
@@ -964,19 +724,14 @@ public class AppClassLoader extends ClassLoader{
 		ClassHelper helper = ClassHelper.getClassHelper(source.getClass());
 		Field[] fields = helper.getAllFields();
 			for (Field f : fields) {
-				Field sField = null;
 				try {
-					sField = helper.getAnyField(f.getName());
+					Field sField = helper.getAnyField(f.getName());
 					if(sField == null)
 						continue;
-					sField.setAccessible(true);
-					f.setAccessible(true);
-					f.set(target, sField.get(source));
+					Object value = ReflectUtils.getFieldValue(sField, source);
+					ReflectUtils.setFieldValue(f, target,  value);
 				} catch (Throwable e) {
 					consumer.accept(e);
-				}finally {
-					if(sField != null)
-						sField.setAccessible(false);
 				}
 			}
 	}
@@ -989,36 +744,31 @@ public class AppClassLoader extends ClassLoader{
 		Field[] fields = ClassHelper.getClassHelper(source.getClass()).getAllFields();
 		Class<?> sCls = source.getClass();
 			for (Field f : fields) {
-				Field sField = null;
 				try {
-					sField =ClassHelper.getClassHelper(sCls).getAnyField(f.getName());
-					sField.setAccessible(true);
-					Object targetFieldObj = sField.get(source);
+					Field sField =ClassHelper.getClassHelper(sCls).getAnyField(f.getName());
+					Object targetFieldObj = ReflectUtils.getFieldValue(sField, source);
 					if(targetFieldObj == null)
 						continue;
-					f.setAccessible(true);
 					if(f.getType().isArray()) {
 						int len = Array.getLength(targetFieldObj);
 						targetFieldObj = Array.newInstance(f.getType(),len );
 						for (int i = 0; i < len; i++) {
 							Object element = Array.get(targetFieldObj, i);
-							if(element!= null && !isBaseUnwrapperType(element.getClass())&& !Modifier.isFinal(element.getClass().getModifiers())){
+							if(element!= null && !ParameterUtils.isBaseUnwrapperType(element.getClass())&& !Modifier.isFinal(element.getClass().getModifiers())){
 								deepClone(element.getClass(), element);
 							}
 							Array.set(targetFieldObj, i,element);
 						}
 					}else {
-						if(!isBaseUnwrapperType(f.getType()) && f.getAnnotation(ShallowClone.class) == null
+						if(!ParameterUtils.isBaseUnwrapperType(f.getType()) && f.getAnnotation(ShallowClone.class) == null
 								&& !Modifier.isFinal(f.getType().getModifiers())) {
 							 targetFieldObj = deepClone(targetFieldObj.getClass(), targetFieldObj);
 						}
 					}
-					f.set(target,targetFieldObj);
+					
+					ReflectUtils.setFieldValue(f, target,  targetFieldObj);
 				} catch (IllegalArgumentException | IllegalAccessException | SecurityException | InstantiationException e) {
 					e.printStackTrace();
-				}finally {
-					if(sField != null)
-						sField.setAccessible(false);
 				}
 			}
 	}
@@ -1049,15 +799,13 @@ public class AppClassLoader extends ClassLoader{
 			T object = target.newInstance();
 			Field[] fields = target.getDeclaredFields();
 			for (Field f : fields) {
-				f.setAccessible(true);
-				Field fs;
 				try {
-					fs = source.getClass().getDeclaredField(f.getName());
-					fs.setAccessible(true);
-					f.set(object, fs.get(source));
+					Field fs = source.getClass().getDeclaredField(f.getName());
+					Object value = ReflectUtils.getFieldValue(fs, source);
+					ReflectUtils.setFieldValue(f, object, value);
 				} catch (NoSuchFieldException | SecurityException e) {
 					try {
-						Method fgm = source.getClass().getMethod(createFieldGetMethod(f.getName()));
+						Method fgm = source.getClass().getMethod(ClassInfoCache.getFieldGetMethod(f.getName()));
 						if (fgm != null)
 							f.set(object, fgm.invoke(source));
 					} catch (NoSuchMethodException | SecurityException | InvocationTargetException e1) {
@@ -1070,416 +818,6 @@ public class AppClassLoader extends ClassLoader{
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	/**
-	 * 判断一个类是否继承自某个接口，不支持包含父类继承的接口的继承 eg. class A implements B{}
-	 * implementOf(A.class,B.class) ==》true class A implements B{},class C
-	 * extends A{}; implementOf(C.class,B.class) ==》false
-	 * 
-	 * @param orginClass 要判断的类
-	 * @param interfaceClass 要验证实现的接口
-	 * @return whether true
-	 */
-	public static boolean implementOf(Class<?> orginClass, Class<?> interfaceClass) {
-		Class<?>[] cls = orginClass.getInterfaces();
-		for (Class<?> cCls : cls) {
-			if (cCls.equals(interfaceClass)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * 判断一个类是否继承自某个接口，支持包含父类继承的接口的继承 class A implements B{}
-	 * implementOf(A.class,B.class) ==》true class A implements B{},class C
-	 * extends A{}; implementOf(C.class,B.class) ==》true
-	 * 
-	 * @param orginClass 要判断的类
-	 * @param interfaceClass 要验证实现的接口
-	 * @return whether true
-	 */
-	public static boolean implementsOf(Class<?> orginClass, Class<?> interfaceClass) {
-		Class<?> tempClass = orginClass;
-		while (tempClass != null) {
-			if (tempClass.equals(interfaceClass)) {
-				return true;
-			}
-			Class<?>[] interfaces = tempClass.getInterfaces();
-			for (Class<?> inter : interfaces) {
-				if (interfaceClass.equals(inter)) {
-					return true;
-				}
-			}
-			tempClass = tempClass.getSuperclass();
-		}
-		return false;
-	}
-	/**
-	 * 判断一个类是否是另一个类的子类
-	 * @param orginClass child class
-	 * @param parentClass parent class
-	 * @return boolean
-	 */
-	public static boolean extendOf(Class<?> orginClass, Class<?> parentClass) {
-		return orginClass.getSuperclass().equals(parentClass);
-	}
-	/**
-	 * 判断一个类是否继承了另一个类,采用多级查找机制，两个类可能是父子，孙爷关系
-	 * 
-	 * @param orginClass child class
-	 * @param parentClass parent class
-	 * @return boolean
-	 */
-	public static boolean extendsOf(Class<?> orginClass, Class<?> parentClass) {
-		Class<?> tempClass = orginClass;
-		while (tempClass != null) {
-			if (tempClass.equals(parentClass)) {
-				return true;
-			}
-			tempClass = tempClass.getSuperclass();
-		}
-		return false;
-	}
-	/**
-	 * 将包装类型转化基础类型
-	 * 
-	 * @param patchType 包装类型
-	 * @return 原始类型
-	 */
-	public static Class<?> patchBaseType(Object patchType) {
-		// 无类型
-		if (patchType.getClass().equals(Void.class)) {
-			return void.class;
-		}
-		// 整形
-		if (patchType.getClass().equals(Integer.class)) {
-			return int.class;
-		}
-		if (patchType.getClass().equals(Short.class)) {
-			return short.class;
-		}
-		if (patchType.getClass().equals(Long.class)) {
-			return long.class;
-		}
-		// 浮点
-		if (patchType.getClass().equals(Double.class)) {
-			return double.class;
-		}
-		if (patchType.getClass().equals(Float.class)) {
-			return float.class;
-		}
-		// 字节
-		if (patchType.getClass().equals(Byte.class)) {
-			return byte.class;
-		}
-		if (patchType.getClass().equals(Character.class)) {
-			return char.class;
-		}
-		// 布尔
-		if (patchType.getClass().equals(Boolean.class)) {
-			return boolean.class;
-		}
-		return patchType.getClass();
-	}
-	/**
-	 * 将一个类型转化为目标类型
-	 * @param orgin orgin
-	 * @param targetType target type
-	 * @return cast type
-	 */
-	public static Object castType(Object orgin, Class<?> targetType) {
-		if(orgin != null
-			&& (implementsOf(orgin.getClass(), targetType)||extendsOf(orgin.getClass(), targetType))) {
-			return orgin;
-		}
-		// 整形
-		if (targetType.equals(int.class)) {
-			return orgin == null?0:(int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
-		}
-		if (targetType.equals(short.class)) {
-			return orgin == null?0:Short.parseShort((String) orgin);
-		}
-		if (targetType.equals(long.class)) {
-			return orgin == null?0:Long.parseLong(orgin.toString());
-		}
-		if (targetType.equals(byte.class)) {
-			return orgin == null?0:Byte.parseByte(orgin.toString());
-		}
-		// 浮点
-		if (targetType.equals(float.class)) {
-			return orgin == null?0:Float.parseFloat(orgin.toString());
-		}
-		if (targetType.equals(double.class)) {
-			return orgin == null?false:Double.parseDouble(orgin.toString());
-		}
-		// 日期
-		if (targetType.equals(Date.class)) {
-			try {
-				if(orgin == null)
-					return null;
-				if(extendsOf(orgin.getClass(), Date.class)) {
-					return orgin;
-				}
-				return SimpleDateFormat.getInstance().parse(orgin.toString());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
-		// 布尔型
-		if (targetType.equals(boolean.class)) {
-			return orgin == null?false:Boolean.parseBoolean((String) orgin);
-		}
-		// char
-		if (targetType.equals(char.class)) {
-			return orgin == null?0:(char) orgin;
-		}
-		if (targetType.equals(String.class)) {
-			return orgin == null?null:orgin.toString();
-		}
-		// 没有匹配到返回源数据
-		return orgin;
-	}
-
-	/**
-	 * 将字符类型转换为目标类型
-	 * 
-	 * @param clzz array class 
-	 * @param arg arg array
-	 * @param format format
-	 * @return cast result
-	 * @throws ParseException ex
-	 */
-	public static Object parseBaseTypeArray(Class<?> clzz, String[] arg, String format) throws ParseException {
-		if (!clzz.isArray()) {
-			return parseBaseType(clzz, arg[0], format);
-		}
-		if (clzz.equals(String[].class)) {
-			return arg;
-		}
-		Object[] args = new Object[arg.length];
-		for (int i = 0; i < args.length; i++) {
-			args[i] = parseBaseType(clzz, arg[i], format);
-		}
-		return args;
-	}
-	/**
-	 * 判断类是否为可支持的基本类型
-	 * 
-	 * @param clzz judge class
-	 * @return whether 
-	 */
-	public static boolean isBaseType(Class<?> clzz) {
-		if (clzz.equals(String.class))
-			return true;
-		if (clzz.equals(boolean.class))
-			return true;
-		if (clzz.equals(int.class))
-			return true;
-		if (clzz.equals(float.class))
-			return true;
-		if (clzz.equals(byte.class))
-			return true;
-		if (clzz.equals(short.class))
-			return true;
-		if (clzz.equals(long.class))
-			return true;
-		if (clzz.equals(double.class))
-			return true;
-		if (clzz.equals(char.class))
-			return true;
-		// 八个基本数据类型的包装类型
-		if (clzz.equals(Byte.class))
-			return true;
-		if (clzz.equals(Short.class))
-			return true;
-		if (clzz.equals(Integer.class))
-			return true;
-		if (clzz.equals(Long.class))
-			return true;
-		if (clzz.equals(Float.class))
-			return true;
-		if (clzz.equals(Double.class))
-			return true;
-		if (clzz.equals(Boolean.class))
-			return true;
-		if (clzz.equals(Character.class))
-			return true;
-		// 日期
-		if (extendsOf(clzz,Date.class))
-			return true;
-
-		// 以上所有类型的数组类型
-		if (clzz.equals(String[].class))
-			return true;
-		if (clzz.equals(boolean[].class))
-			return true;
-		if (clzz.equals(int[].class))
-			return true;
-		if (clzz.equals(float[].class))
-			return true;
-		if (clzz.equals(byte[].class))
-			return true;
-		if (clzz.equals(short[].class))
-			return true;
-		if (clzz.equals(long[].class))
-			return true;
-		if (clzz.equals(double[].class))
-			return true;
-		if (clzz.equals(char[].class))
-			return true;
-		// 八个基本数据类型的包装类型
-		if (clzz.equals(Short[].class))
-			return true;
-		if (clzz.equals(Integer[].class))
-			return true;
-		if (clzz.equals(Long[].class))
-			return true;
-		if (clzz.equals(Float[].class))
-			return true;
-		if (clzz.equals(Double[].class))
-			return true;
-		if (clzz.equals(Boolean[].class))
-			return true;
-		if (clzz.equals(Character[].class))
-			return true;
-		// 日期
-		if (extendsOf(clzz,Date[].class))
-			return true;
-		return false;
-	}
-	/**
-	 * 判断类是否为可支持的基本无包裹类型
-	 * 
-	 * @param clzz judge class
-	 * @return whether 
-	 */
-	public static boolean isBaseUnwrapperType(Class<?> clzz) {
-		if (clzz.equals(String.class))
-			return true;
-		if (clzz.equals(boolean.class))
-			return true;
-		if (clzz.equals(int.class))
-			return true;
-		if (clzz.equals(float.class))
-			return true;
-		if (clzz.equals(byte.class))
-			return true;
-		if (clzz.equals(short.class))
-			return true;
-		if (clzz.equals(long.class))
-			return true;
-		if (clzz.equals(double.class))
-			return true;
-		if (clzz.equals(char.class))
-			return true;
-		return false;
-	}
-	/**
-	 * 将字符类型转换为目标类型
-	 * 
-	 * @param clzz target type
-	 * @param arg argument string
-	 * @param format the date format
-	 * @return parse result
-	 */
-	public static Object parseBaseType(Class<?> clzz, String arg, String format) {
-		// 匹配时应该考虑优先级 比如常用的String int boolean应该放在前面 其实 包装类型应该分开
-		if (clzz.equals(String.class))
-			return arg;
-		// 8个基本数据类型及其包装类型
-		if (clzz.equals(int.class))
-			return arg == null ? 0 : Integer.parseInt(arg);
-		if (clzz.equals(Integer.class))
-			return arg == null ? null : Integer.valueOf(arg);
-
-		if (clzz.equals(boolean.class))
-			return arg == null ? false : Boolean.parseBoolean(arg);
-		if (clzz.equals(Boolean.class))
-			return arg == null ? null : Boolean.valueOf(arg);
-
-		if (clzz.equals(float.class))
-			return arg == null ? 0.0f : Float.parseFloat(arg);
-		if (clzz.equals(Float.class))
-			return arg == null ? null : Float.valueOf(arg);
-
-		if (clzz.equals(short.class))
-			return arg == null ? 0 : Short.parseShort(arg);
-		if (clzz.equals(Short.class))
-			return arg == null ? null : Short.valueOf(arg);
-
-		if (clzz.equals(long.class))
-			return arg == null ? 0l : Long.parseLong(arg);
-		if (clzz.equals(Long.class))
-			return arg == null ? null : Long.valueOf(arg);
-
-		if (clzz.equals(double.class))
-			return arg == null ? 0.0f : Double.parseDouble(arg);
-		if (clzz.equals(Double.class))
-			return arg == null ? null : Double.valueOf(arg);
-
-		if (clzz.equals(char.class))
-			return arg == null ? null : arg.charAt(0);
-		if (clzz.equals(Character.class))
-			return arg == null ? null : Character.valueOf(arg.charAt(0));
-
-		if (clzz.equals(char[].class))
-			return arg == null ? null : arg.toCharArray();
-
-		if (clzz.equals(byte.class) || clzz.equals(Byte.class))
-			return arg == null ? null : Byte.parseByte(arg);
-		// 日期
-		if (clzz.equals(Date.class))
-			try {
-				return format == null ? DATE_FORMAT.parse(arg) : new SimpleDateFormat(format).parse(arg);
-			} catch (ParseException e) {
-				new RuntimeException(e);
-			}
-		return arg;
-	}
-	@SuppressWarnings("unchecked")
-	public static <T> T getFieldValue(Field field, Object proxyInstance) throws IllegalArgumentException, IllegalAccessException {
-		field.setAccessible(true);
-		Object result = field.get(proxyInstance);
-		field.setAccessible(false);
-		return (T) result;
-	}
-	/**
-	 * 传入参数类型和目标参数类型匹配，主要用于判断方法的匹配
-	 * 支持子类型判断，比如[string,int]--[object,int]匹配
-	 * @param matchType match type
-	 * @param parameterTypes parameter type
-	 * @return boolean
-	 */
-	public static  boolean matchType(Class<?>[] matchType, Class<?>[] parameterTypes) {
-		if(parameterTypes.length!=matchType.length)
-			return false;
-		for(int i = 0;i<parameterTypes.length;i++){
-			if(parameterTypes[i]==null&&!isNotNullType(matchType[i]))
-				continue;
-			if(parameterTypes[i].equals(matchType[i]))
-				continue;
-			if(AppClassLoader.extendsOf(parameterTypes[i], matchType[i]))
-				continue;
-			if(AppClassLoader.implementsOf(parameterTypes[i], matchType[i]))
-				continue;
-			return false;
-		}
-		return true;
-	}
-	/**
-	 * 类型传入类型是否为非空类型，主要用于某些值在初始化的时候不能为null
-	 * @param type target type
-	 * @return boolean
-	 */
-	public static boolean isNotNullType(Class<?> type) {
-		return type.equals(int.class)||
-			   type.equals(long.class)||
-			   type.equals(float.class)||
-			   type.equals(double.class)||
-			   type.equals(short.class)||
-			   type.equals(boolean.class)?true:false;
 	}
 	/**
 	 * 加载类的二进制字节码
@@ -1560,47 +898,6 @@ public class AppClassLoader extends ClassLoader{
 	        }
 	    }
 	/**
-	 * 获取field为List的泛型
-	 * @param field the field
-	 * @return the generic type
-	 */
-	public static Class<?> getListGenericType(Field field) {
-		Type genericType = field.getGenericType(); 
-		if(genericType != null && genericType instanceof ParameterizedType){   
-			ParameterizedType pt = (ParameterizedType) genericType;
-			//得到泛型里的class类型对象  
-			Class<?> genericClazz = (Class<?>)pt.getActualTypeArguments()[0]; 
-			return genericClazz;
-		}   
-		return null;
-	}
-	/**
-	 * 获取Parameter为List的泛型
-	 * @param parm the parameter
-	 * @return generic type of the parameter
-	 */
-	public static Class<?> getListGenericType(Parameter parm) {
-		Type genericType = parm.getParameterizedType(); 
-		if(genericType != null && genericType instanceof ParameterizedType){   
-			ParameterizedType pt = (ParameterizedType) genericType;
-			//得到泛型里的class类型对象  
-			Class<?> genericClazz = (Class<?>)pt.getActualTypeArguments()[0]; 
-			return genericClazz;
-		}   
-		return null;
-	}
-	/**
-	 * 获取数组的类型
-	 * @param arrayClass array class
-	 * @return the type of array
-	 */
-	public static Class<?> getArrayType(Class<?> arrayClass){
-		if(arrayClass.isArray()){
-			return arrayClass.getComponentType();
-		}
-		return null;
-	}
-	/**
 	 * 通过某加载器加载某类
 	 * @param clzzName class name
 	 * @param bytes class bytes
@@ -1616,9 +913,7 @@ public class AppClassLoader extends ClassLoader{
 			}
 			if(method == null)
 				return null;
-			method.setAccessible(true);
-			Class<?> resultClass = (Class<?>) method.invoke(ncLoader, clzzName,bytes,0,bytes.length);
-			method.setAccessible(false);
+			Class<?> resultClass = (Class<?>) ReflectUtils.invokeMethod(ncLoader, method, clzzName,bytes,0,bytes.length);
 			return resultClass;
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
@@ -1628,20 +923,37 @@ public class AppClassLoader extends ClassLoader{
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		//获取当前线程的加载器
-		java.lang.ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		//从线程加载加载资源
         return loader.loadClass(name);
     }
 	/**
-	 * 获取一个类的外部类
-	 * @param targetClass 寻找的目标类
-	 * @return 外部类
-	 * @throws ClassNotFoundException ex
+	 * 获取当前线程上下文的类路径资源
+	 * @return
 	 */
-	public static Class<?> getOuterClass(Class<?> targetClass) throws ClassNotFoundException {
-		String className = targetClass.getName();
-		className = className.substring(0,className.lastIndexOf('$'));
-		Class<?> outerClass = Class.forName(className);
-		return outerClass;
+	public static String getCurrentContextClassPath() {
+		return getClassLoaderClassPath(Thread.currentThread().getContextClassLoader());
+	}
+	/**
+	 * 获取类加载器的类路径
+	 * @param classLoader 资源加载器
+	 * @return 资源加载器的类路径
+	 */
+	public static String getClassLoaderClassPath(ClassLoader classLoader) {
+		return processPath(classLoader.getResource(".").getPath());
+	}
+	public static String processPath(String path) {
+		return path.replace("%20", " ");
+	}
+	/**
+	 * 获取类所在的类路径
+	 * @param targetClass 类资源
+	 * @return 类路径
+	 */
+	public static String getClassClasspath(Class<?> targetClass) {
+		String classPackage = targetClass.getPackage().getName().replace(".", "/");
+		String resourcePath = processPath(targetClass.getResource(".").getPath())
+				.replace("file:", "");
+		return resourcePath.substring(0,resourcePath.lastIndexOf(classPackage));
 	}
 }

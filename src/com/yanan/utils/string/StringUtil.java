@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.yanan.utils.reflect.AppClassLoader;
+import com.yanan.utils.reflect.cache.ClassInfoCache;
 
 /**
  * 一个工具用于提供字符串相关操作
@@ -42,7 +43,7 @@ public class StringUtil {
 			String result = m.group();
 			Matcher mA = reVar.matcher(result);
 			String field = mA.replaceAll("");
-			if (loader.hasMethod(AppClassLoader.createFieldGetMethod(field))) {
+			if (loader.hasMethod(ClassInfoCache.getFieldGetMethod(field))) {
 				try {
 					result = (String) loader.get(field);
 				} catch (SecurityException | IllegalArgumentException | IllegalAccessException

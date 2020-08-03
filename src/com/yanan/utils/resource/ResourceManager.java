@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import com.yanan.utils.ArrayUtils;
 import com.yanan.utils.asserts.Assert;
-import com.yanan.utils.resource.AbstractResourceEntry.Type;
 import com.yanan.utils.resource.scanner.ResourceScanner;
 import com.yanan.utils.resource.scanner.ResourceScannerException;
 import com.yanan.utils.string.StringUtil;
@@ -95,21 +94,24 @@ public class ResourceManager {
 	 * @param pathExpress 路径表达式
 	 * @return 抽象资源列表
 	 */
-	public static List<AbstractResourceEntry> getResourceList(String pathExpress) {
+	public static List<Resource> getResourceList(String pathExpress) {
 		String[] pathResults = getPathExress(pathExpress);
-		List<AbstractResourceEntry> result = new ArrayList<AbstractResourceEntry>();
+		List<Resource> result = new ArrayList<>();
 		for (String pathResult : pathResults) {
 			int index = pathResult.indexOf("*");
 			int qndex = pathResult.indexOf("?");
 			if (qndex > -1 && qndex < index)
 				index = qndex;
 			if (index == -1) {
-				File file = new File(pathResult);
-				result.add(new AbstractResourceEntry(file.getAbsolutePath(), file.getName(), file.getAbsolutePath(),
-						Type.FILE, file, null));
-				continue;
-//				Assert.isFalse(file.exists(),new ResourceNotFoundException("resource \"" +pathResult+"\" is not exists! absolute:\""+file.getAbsolutePath()+"\""));
-//				return Arrays.asList();
+				Resource resource ;
+				//普通文件直接返回了
+				if(pathExpress.indexOf(".jar!") == -1) {
+					File file = new File(pathResult);
+					resource = new FileResource(file);
+					result.add(resource);
+					continue;
+				}
+				index = pathResult.length();
 			}
 			String path = pathResult.substring(0, index);
 			qndex = path.lastIndexOf("/");
@@ -133,18 +135,18 @@ public class ResourceManager {
 	 * @param pathExpress 路径表达式
 	 * @return 抽象资源
 	 */
-	public static AbstractResourceEntry getResource(String pathExpress) {
-		List<AbstractResourceEntry> list = getResourceList(pathExpress);
+	public static Resource getResource(String pathExpress) {
+		List<Resource> list = getResourceList(pathExpress);
 		return list == null || list.isEmpty() ? null : list.get(0);
 	}
 
 	/*
 	 * 获取匹配的资源，是获取抽象资源的具体实现
 	 */
-	private static List<AbstractResourceEntry> getMatchFile(String pathExpress, String regex) {
+	private static List<Resource> getMatchFile(String pathExpress, String regex) {
 		ResourceScanner path = new ResourceScanner(pathExpress);
 		path.filter(regex);
-		final List<AbstractResourceEntry> fileList = new ArrayList<AbstractResourceEntry>();
+		final List<Resource> fileList = new ArrayList<>();
 		path.scanner((resource) -> fileList.add(resource));
 		return fileList;
 	}
