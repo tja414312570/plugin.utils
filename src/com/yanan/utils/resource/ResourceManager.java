@@ -3,6 +3,7 @@ package com.yanan.utils.resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -179,10 +180,14 @@ public class ResourceManager {
 				}
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				String path = null;
+				
 				while (loader != null) {
-					path = loader.getResource("").getPath().replace("%20", " ");
-					if (!temp.contains(path))
-						temp.add(path);
+					URL url = loader.getResource("");
+					if(url != null) {
+						path = loader.getResource("").getPath().replace("%20", " ");
+						if (!temp.contains(path))
+							temp.add(path);
+					}
 					loader = loader.getParent();
 				}
 				classPaths = temp.toArray(new String[] {});

@@ -338,7 +338,74 @@ public class ReflectUtils {
 		method.setAccessible(false);
 		return result;
 	}
-
+	/**
+	 * 调用方法
+	 * @param instance 实例
+	 * @param methodName 方法
+	 * @param args 参数
+	 * @return 调用结果
+	 * @throws IllegalAccessException ex
+	 * @throws IllegalArgumentException ex
+	 * @throws InvocationTargetException ex
+	 * @throws SecurityException ex
+	 * @throws NoSuchMethodException  
+	 */
+	public static Object invokeMethod(Object instance,String methodName,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+		Class<?>[] types = ParameterUtils.getParameterTypes(args);
+		Method method = instance.getClass().getMethod(methodName, types);
+		return invokeMethod(instance,method,args);
+	}
+	/**
+	 * 调用方法
+	 * @param instance 实例
+	 * @param methodName 方法
+	 * @param argsType 参数类型
+	 * @param args 参数
+	 * @return 调用结果
+	 * @throws IllegalAccessException ex
+	 * @throws IllegalArgumentException ex
+	 * @throws InvocationTargetException ex
+	 * @throws SecurityException ex
+	 * @throws NoSuchMethodException  
+	 */
+	public static Object invokeMethod(Object instance,String methodName,Class<?>[] argsType,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+		Method method = instance.getClass().getMethod(methodName, argsType);
+		return invokeMethod(instance,method,args);
+	}
+	/**
+	 * 调用方法
+	 * @param instance 实例
+	 * @param methodName 方法
+	 * @param args 参数
+	 * @return 调用结果
+	 * @throws IllegalAccessException ex
+	 * @throws IllegalArgumentException ex
+	 * @throws InvocationTargetException ex
+	 * @throws SecurityException ex
+	 * @throws NoSuchMethodException  
+	 */
+	public static Object invokeDeclaredMethod(Object instance,String methodName,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+		Class<?>[] types = ParameterUtils.getParameterTypes(args);
+		Method method = instance.getClass().getDeclaredMethod(methodName, types);
+		return invokeMethod(instance,method,args);
+	}
+	/**
+	 * 调用方法
+	 * @param instance 实例
+	 * @param methodName 方法
+	 * @param argsType 参数类型
+	 * @param args 参数
+	 * @return 调用结果
+	 * @throws IllegalAccessException ex
+	 * @throws IllegalArgumentException ex
+	 * @throws InvocationTargetException ex
+	 * @throws SecurityException ex
+	 * @throws NoSuchMethodException  
+	 */
+	public static Object invokeDeclaredMethod(Object instance,String methodName,Class<?>[] argsType,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+		Method method = instance.getClass().getDeclaredMethod(methodName, argsType);
+		return invokeMethod(instance,method,args);
+	}
 	/**
 	 * 判断一个类是否继承自某个接口，不支持包含父类继承的接口的继承 eg. class A implements B{}
 	 * implementOf(A.class,B.class) ==》true class A implements B{},class C extends
