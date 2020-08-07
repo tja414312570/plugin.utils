@@ -18,6 +18,7 @@ import com.yanan.utils.reflect.cache.ClassInfoCache;
  *
  */
 public class StringUtil {
+	public static final String WINDOWS_FILE_TOKEN = "file:/";
 	public static int maxTimes = 10;
 	//资源缓存
 	private static Map<Integer, Boolean> resourceCache = new HashMap<Integer, Boolean>();
@@ -721,7 +722,6 @@ public class StringUtil {
 				--index;
 				while (index < express.length() && express.charAt(index++) == '?')
 					sb.append('?');
-				System.out.println(sb);
 				token = new Token();
 				token.setToken(sb.toString());
 				tokens.add(token);
@@ -874,5 +874,42 @@ public class StringUtil {
 	 */
 	public static boolean contains(String src, String target) {
 		return indexOf(src, target) != -1;
+	}
+	/**
+	 * 获取字符串中目标字符的位置
+	 * @param src 原字符串
+	 * @param start 开始位置
+	 * @param end 结束位置
+	 * @param targets 要查找的字符数组
+	 * @return 位置
+	 */
+	public static int indexOf(String src,int start,int end, char... targets) {
+		char[] chars = src.toCharArray();
+		for(int i = start;i<end;i++) {
+			for(char ch : targets) {
+				if(chars[i] == ch)
+					return i;
+			}
+		}
+		return -1; 
+	}
+	/**
+	 * 获取字符串中目标字符的位置
+	 * @param src 原字符串
+	 * @param start 开始位置
+	 * @param targets 要查找的字符数组
+	 * @return 位置
+	 */
+	public static int indexOf(String src,int start,char... targets) {
+		return indexOf(src,start,src.length(),targets); 
+	}
+	/**
+	 * 获取字符串中目标字符的位置
+	 * @param src 原字符串
+	 * @param targets 要查找的字符数组
+	 * @return 位置
+	 */
+	public static int indexOf(String src,char... targets) {
+		return indexOf(src,0,src.length(),targets); 
 	}
 }

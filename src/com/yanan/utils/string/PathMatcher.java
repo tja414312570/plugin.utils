@@ -1,20 +1,15 @@
 package com.yanan.utils.string;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-
 import java.util.Set;
 
 import com.yanan.utils.asserts.Assert;
-import com.yanan.utils.string.StringUtil;
 
 /**
  * ant style path matcher
@@ -60,6 +55,7 @@ public class PathMatcher {
 	public static PathMatcher getPathMatcher(String express) {
 		PathMatcher pathMatcher = tokensCache.get(express);
 		if(pathMatcher==null){
+			express = express.replace('\\', '/');
 			pathMatcher = new PathMatcher(express);
 			pathMatcher.buildVariableToken();
 			tokensCache.put(express,pathMatcher);
@@ -189,7 +185,7 @@ iterator: while (index < express.length()) {
 								String num = variable.substring(i + 1);
 								if (StringUtil.isNotEmpty(num)) {
 									exp = "?";
-									int bum = (int) parseBaseType(int.class, num, null);
+									int bum = (int) parseBaseType(int.class, num);
 									while (--bum > 0)
 										exp += "?";
 								}
@@ -237,6 +233,7 @@ iterator: while (index < express.length()) {
 	 * @return Matcher 匹配结果
 	 */
 	public static Matcher match(String express, String path) {
+		path = path.replace('\\', '/');
 		PathMatcher pathMatcher = PathMatcher.getPathMatcher(express);
 		return pathMatcher.match(path);
 	}
@@ -269,14 +266,14 @@ iterator: while (index < express.length()) {
 						if (p < 0)
 							return false;
 						String ma = resource.substring(0, p);
-						if (ma.indexOf("/") != -1) {
+						if (ma.indexOf('/') != -1) {
 							return false;
 						}
 						token.setValue(ma);
 						resource = resource.substring(p + nT.getToken().length());
 					} else {// 最后一个位置
 						String ma = resource;
-						if (ma.indexOf("/") != -1) {
+						if (StringUtil.indexOf(ma,'/') != -1) {
 							return false;
 						}
 							token.setValue(ma);
@@ -340,7 +337,7 @@ iterator: while (index < express.length()) {
 	public String getBuildExpress() {
 		return buildExpress;
 	}
-	public static Object parseBaseType(Class<?> clzz, String arg, String format) throws ParseException {
+	public static Object parseBaseType(Class<?> clzz, String arg) throws ParseException {
 		// 匹配时应该考虑优先级 比如常用的String int boolean应该放在前面 其实 包装类型应该分开
 		if (clzz.equals(String.class))
 			return arg;
@@ -385,9 +382,6 @@ iterator: while (index < express.length()) {
 
 		if (clzz.equals(byte.class) || clzz.equals(Byte.class))
 			return arg == null ? null : Byte.parseByte(arg);
-		// 日期
-		if (clzz.equals(Date.class))
-			return new SimpleDateFormat(format).parse(arg);
 		return arg;
 	}
 
