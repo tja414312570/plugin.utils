@@ -263,4 +263,20 @@ public class ResourceManager {
 			classPaths = ArrayUtils.add(classPaths, classPaths);
 		}
 	}
+	/**
+	 * 对路径进行处理
+	 * @param path 路径
+	 * @return 处理后路径
+	 */
+	public static String processPath(String path) {
+		//nt系统
+		if (System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+			if(path.startsWith("/")) {
+				path = path.substring(1);
+			}else {
+				path = path.replace('\\', '/');
+			}
+		}
+		return path.replace("%20", " ");
+	}
 }

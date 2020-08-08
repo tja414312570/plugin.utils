@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.yanan.utils.asserts.Assert;
+import com.yanan.utils.resource.ResourceManager;
 
 /**
  * ant style path matcher
@@ -55,7 +56,7 @@ public class PathMatcher {
 	public static PathMatcher getPathMatcher(String express) {
 		PathMatcher pathMatcher = tokensCache.get(express);
 		if(pathMatcher==null){
-			express = express.replace('\\', '/');
+			express = ResourceManager.processPath(express);
 			pathMatcher = new PathMatcher(express);
 			pathMatcher.buildVariableToken();
 			tokensCache.put(express,pathMatcher);
@@ -233,7 +234,7 @@ iterator: while (index < express.length()) {
 	 * @return Matcher 匹配结果
 	 */
 	public static Matcher match(String express, String path) {
-		path = path.replace('\\', '/');
+		path = ResourceManager.processPath(path);
 		PathMatcher pathMatcher = PathMatcher.getPathMatcher(express);
 		return pathMatcher.match(path);
 	}

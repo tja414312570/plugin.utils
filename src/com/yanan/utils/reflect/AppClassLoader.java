@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import com.yanan.utils.UnsafeUtils;
 import com.yanan.utils.reflect.cache.ClassHelper;
 import com.yanan.utils.reflect.cache.ClassInfoCache;
+import com.yanan.utils.resource.ResourceManager;
 import com.yanan.utils.string.PathMatcher;
 /**
  * ClassLoader for YaNan.frame 该类加载器是YaNan应用的核心处理机制之一，用于对应用内部实体、类等的控制
@@ -940,10 +941,7 @@ public class AppClassLoader extends ClassLoader{
 	 * @return 资源加载器的类路径
 	 */
 	public static String getClassLoaderClassPath(ClassLoader classLoader) {
-		return processPath(classLoader.getResource(".").getPath());
-	}
-	public static String processPath(String path) {
-		return path.replace("%20", " ");
+		return ResourceManager.processPath(classLoader.getResource(".").getPath());
 	}
 	/**
 	 * 获取类所在的类路径
@@ -952,7 +950,7 @@ public class AppClassLoader extends ClassLoader{
 	 */
 	public static String getClassClasspath(Class<?> targetClass) {
 		String classPackage = targetClass.getPackage().getName().replace(".", "/");
-		String resourcePath = processPath(targetClass.getResource(".").getPath())
+		String resourcePath = ResourceManager.processPath(targetClass.getResource(".").getPath())
 				.replace("file:", "");
 		return resourcePath.substring(0,resourcePath.lastIndexOf(classPackage));
 	}

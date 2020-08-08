@@ -1,12 +1,12 @@
 package com.yanan.utils.resource.scanner;
 
 
-import java.io.File;
 import java.util.Arrays;
 
 import com.yanan.utils.resource.Resource;
 import com.yanan.utils.resource.ResourceManager;
 import com.yanan.utils.resource.scanner.ResourceScanner.ResourceInter;
+import com.yanan.utils.string.StringUtil;
 
 /**
  * 支持通配符,按照PathMath匹配模式
@@ -93,16 +93,16 @@ public class PackageScanner {
 				sourcePath = ResourceManager.classPath();//资源目录
 				packagePathName = packDir;
 			}
-			String scannerPathName = sourcePath+packagePathName.replace(".", File.separator);
+			String scannerPathName = sourcePath+packagePathName.replace('.', '/');
 			int filterIndex = getMarkIndex(scannerPathName, 0);
 			if(filterIndex>-1) {
 				filter = scannerPathName;
-				scannerPathName = scannerPathName.substring(0,scannerPathName.lastIndexOf(File.separator));
+				scannerPathName = scannerPathName.substring(0,StringUtil.lastIndexOf(scannerPathName,'\\','/'));
 			}
 			scannerPath= scannerPathName;//扫描路径
 			resourcePathName = sourcePath;
-			if(!resourcePathName.endsWith(File.separator)) {
-				resourcePathName+=File.separator;
+			if(!StringUtil.endsWith(resourcePathName,'/')) {
+				resourcePathName+='/';
 			}
 			this.scanner(scannerPath,resourcePathName,inter,filter);
 		}

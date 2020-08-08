@@ -912,4 +912,23 @@ public class StringUtil {
 	public static int indexOf(String src,char... targets) {
 		return indexOf(src,0,src.length(),targets); 
 	}
+	/**
+	 * 获取字符串中某个字符最后出现的位置
+	 * @param src 字符串
+	 * @param targets 目标字符
+	 * @return 位置
+	 */
+	public static int lastIndexOf(String src, char... targets) {
+		char[] chars = src.toCharArray();
+		for(int i = src.length()-1;i>-1;i--) {
+			for(char ch : targets) {
+				if(chars[i] == ch)
+					return i;
+			}
+		}
+		return -1;
+	}
+	public static boolean endsWith(String src, char c) {
+		return src.charAt(src.length()-1) == c;
+	}
 }

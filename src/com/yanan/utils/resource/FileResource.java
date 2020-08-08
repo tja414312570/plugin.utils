@@ -51,7 +51,7 @@ public class FileResource implements Resource {
 	 * @return the path
 	 */
 	public String getPath() {
-		return file.getAbsolutePath();
+		return ResourceManager.processPath(file.getAbsolutePath());
 	}
 
 	/**
