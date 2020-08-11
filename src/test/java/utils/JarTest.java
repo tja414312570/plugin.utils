@@ -1,12 +1,12 @@
 package utils;
 
-import com.yanan.utils.resource.AbstractResourceEntry;
+import com.yanan.utils.resource.Resource;
 import com.yanan.utils.resource.ResourceManager;
 
 //file:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/rt.jar!/java/util/jar/JarFile.class
 public class JarTest {
 	public static void main(String[] args) {
-		AbstractResourceEntry resource = ResourceManager.getResource("classpath:com");
+		Resource resource = ResourceManager.getResource("classpath:com");
 		System.out.println(resource);
 		System.out.println(resource.listResource());
 		//ResourceManager.classPath();//
