@@ -18,7 +18,6 @@ import com.yanan.utils.reflect.cache.ClassInfoCache;
  *
  */
 public class StringUtil {
-	public static final String WINDOWS_FILE_TOKEN = "file:/";
 	public static int maxTimes = 10;
 	//资源缓存
 	private static Map<Integer, Boolean> resourceCache = new HashMap<Integer, Boolean>();
