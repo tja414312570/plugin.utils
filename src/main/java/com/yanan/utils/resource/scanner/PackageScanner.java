@@ -41,6 +41,7 @@ public class PackageScanner {
 		return packageDirs == null?null:Arrays.copyOf(packageDirs, packageDirs.length);
 	}
 	public void addScanPath(String... paths) {
+		paths = ResourceManager.getPathExress(paths);
 		if(paths.length>0) {
 			if(packageDirs==null) {
 				packageDirs =paths;
@@ -120,6 +121,7 @@ public class PackageScanner {
 					try {
 						inter.find(Class.forName(className));
 					} catch (Throwable e) {
+						e.printStackTrace();
 						if(!ignoreLoadingException)
 							throw new RuntimeException("failed to load class \""+className+"\" at class file \""+resourceEntry.getPath()+"\"",e);
 					}

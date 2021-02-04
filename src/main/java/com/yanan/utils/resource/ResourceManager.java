@@ -72,6 +72,7 @@ public class ResourceManager {
 			String[] paths = getPathExress(pathExpress);
 			if (paths != null) {
 				for (String path : paths) {
+					path = processPath(path);
 					pathList.add(path);
 				}
 			}
@@ -86,7 +87,7 @@ public class ResourceManager {
 	 * @throws IOException ex
 	 */
 	public static String projectPath() throws IOException {
-		return new File("").getCanonicalPath().replace("%20", " ");
+		return processPath(new File("").getCanonicalPath());
 	}
 
 	/**
@@ -125,6 +126,7 @@ public class ResourceManager {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			path = processPath(path);
 			result.addAll(getMatchFile(path, pathResult));
 		}
 		return result.stream().distinct().collect(Collectors.toList());
@@ -164,7 +166,22 @@ public class ResourceManager {
 	public static String[] classPaths() {
 		if (classPaths == null) {
 			synchronized (ResourceManager.class) {
-				Vector<String> temp = new Vector<>();
+				Vector<String> temp = new Vector<String>() {
+					private static final long serialVersionUID = 1L;
+					@Override
+					public synchronized int indexOf(Object o, int index) {
+				        if (o == null) {
+				            for (int i = index ; i < elementCount ; i++)
+				                if (elementData[i]==null)
+				                    return i;
+				        } else {
+				            for (int i = index ; i < elementCount ; i++)
+				                if (StringUtil.equals((String)o, (String)elementData[i]))
+				                    return i;
+				        }
+				        return -1;
+				    }
+				};
 				StackTraceElement[] stacks = new RuntimeException().getStackTrace();
 				Class<?> mainClass = null;
 				for (StackTraceElement stack : stacks) {
@@ -184,7 +201,7 @@ public class ResourceManager {
 				while (loader != null) {
 					URL url = loader.getResource("");
 					if(url != null) {
-						path = loader.getResource("").getPath().replace("%20", " ");
+						path = processPath(loader.getResource("").getPath());
 						if (!temp.contains(path))
 							temp.add(path);
 					}
@@ -218,12 +235,12 @@ public class ResourceManager {
 			try {
 				path = clzz.getResource(".").getFile().replace("%20", " ");
 				String packagePath = clzz.getPackage().getName().replace(".", File.separator);
-				classPaths[i] = path.substring(0, path.lastIndexOf(packagePath));
+				classPaths[i] = processPath(path.substring(0, path.lastIndexOf(packagePath)));
 			} catch (Exception e) {
 				path = clzz.getProtectionDomain().getCodeSource().getLocation().getFile();
 				try {
 					path = java.net.URLDecoder.decode(path, "UTF-8");
-					classPaths[i] = path.replace("%20", " ");
+					classPaths[i] = processPath(path);
 				} catch (UnsupportedEncodingException t) {
 					t.addSuppressed(e);
 					throw new ResourceScannerException(t);
@@ -240,7 +257,8 @@ public class ResourceManager {
 	 */
 	public static void setClassPath(String classPath,int index) {
 		synchronized (ResourceManager.class) {
-			classPaths = ArrayUtils.add(classPaths, classPath, index);
+			if(ArrayUtils.indexOf(classPaths, classPath) == -1)
+				classPaths = ArrayUtils.add(classPaths, classPath, index);
 		}
 	}
 
