@@ -71,7 +71,13 @@ public class PackageScanner {
 		for (String packDir : packageDirs) {
 			if (packDir == null)
 				continue;
-			String packReplace = packDir.replace(".", "/");
+			String packReplace;
+			int index = packDir.lastIndexOf("/");
+			if(index == -1) {
+				packReplace = packDir.replace(".", "/");
+			}else {
+				packReplace = packDir.substring(0,index+1)+packDir.substring(index+1).replace(".", "/");
+			}
 			String[] paths = ResourceManager.getPathExress(packReplace);
 			this.doScanner(paths,inter);
 		}
