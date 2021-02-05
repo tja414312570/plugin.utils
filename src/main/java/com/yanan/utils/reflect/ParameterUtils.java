@@ -389,15 +389,4 @@ public class ParameterUtils{
 		}   
 		return null;
 	}
-	/**
-	 * 获取数组的类型
-	 * @param arrayClass array class
-	 * @return the type of array
-	 */
-	public static Class<?> getArrayType(Class<?> arrayClass){
-		if(arrayClass.isArray()){
-			return arrayClass.getComponentType();
-		}
-		return null;
-	}
 }

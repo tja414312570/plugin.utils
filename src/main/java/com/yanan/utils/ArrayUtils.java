@@ -2,8 +2,6 @@ package com.yanan.utils;
 
 import java.lang.reflect.Array;
 
-import com.yanan.utils.reflect.ParameterUtils;
-
 /**
  * 数组工具
  * 
@@ -54,7 +52,7 @@ public class ArrayUtils {
 			return null;
 		if (arrays == null)
 			return elements;
-		T[] newArrays = (T[]) Array.newInstance(ParameterUtils.getArrayType(arrays.getClass()),
+		T[] newArrays = (T[]) Array.newInstance(getArrayType(arrays.getClass()),
 				arrays.length + elements.length);
 		System.arraycopy(arrays, 0, newArrays, 0, arrays.length);
 		System.arraycopy(elements, 0, newArrays, arrays.length, elements.length);
@@ -78,7 +76,7 @@ public class ArrayUtils {
 		}
 		if (index > arrays.length)
 			throw new IndexOutOfBoundsException();
-		T[] newArrays = (T[]) Array.newInstance(ParameterUtils.getArrayType(arrays.getClass()), arrays.length + 1);
+		T[] newArrays = (T[]) Array.newInstance(getArrayType(arrays.getClass()), arrays.length + 1);
 		//判断位置 处于边界位置 可以减少复制数组的次数
 		if(index == 0)
 			System.arraycopy(arrays, 0, newArrays, 1, arrays.length);
@@ -118,10 +116,21 @@ public class ArrayUtils {
 			return array2;
 		if(isEmpty(array2))
 			return null;
-		T[] newArray = (T[]) Array.newInstance(ParameterUtils.getArrayType(array1.getClass()), 
+		T[] newArray = (T[]) Array.newInstance(getArrayType(array1.getClass()), 
 				array2.length+array2.length);
 		System.arraycopy(array1, 0, newArray, 0, array1.length);
 		System.arraycopy(array2, 0, newArray, array1.length-1, array2.length);
 		return newArray;
+	}
+	/**
+	 * 获取数组的类型
+	 * @param arrayClass array class
+	 * @return the type of array
+	 */
+	public static Class<?> getArrayType(Class<?> arrayClass){
+		if(arrayClass.isArray()){
+			return arrayClass.getComponentType();
+		}
+		return null;
 	}
 }

@@ -40,6 +40,9 @@ public class ClassPathResource implements Resource {
 		this.jarEntry = jarEntry;
 		this.resourceLoader = resourceLoader;
 	}
+	public ClassLoader getResourceLoader() {
+		return resourceLoader;
+	}
 	/**
 	 * 类路径资源，用于将类资源封装为抽象资源使用
 	 * @param path 路径

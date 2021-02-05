@@ -3,10 +3,10 @@ package com.yanan.utils.resource.scanner;
 
 import java.util.Arrays;
 
+import com.yanan.utils.ArrayUtils;
 import com.yanan.utils.resource.Resource;
 import com.yanan.utils.resource.ResourceManager;
 import com.yanan.utils.resource.scanner.ResourceScanner.ResourceInter;
-import com.yanan.utils.string.StringUtil;
 
 /**
  * 支持通配符,按照PathMath匹配模式
@@ -14,6 +14,7 @@ import com.yanan.utils.string.StringUtil;
  *
  */
 public class PackageScanner {
+	private static final String JAR_SUFFIX = ".jar!";
 	private String[] packageDirs;
 	private boolean ignoreLoadingException;
 	
@@ -41,15 +42,11 @@ public class PackageScanner {
 		return packageDirs == null?null:Arrays.copyOf(packageDirs, packageDirs.length);
 	}
 	public void addScanPath(String... paths) {
-		paths = ResourceManager.getPathExress(paths);
 		if(paths.length>0) {
 			if(packageDirs==null) {
 				packageDirs =paths;
 			}else {
-				String[] pathCache = new String[paths.length+packageDirs.length];
-				System.arraycopy(packageDirs, 0, pathCache, 0, packageDirs.length);
-				System.arraycopy(paths, 0, pathCache, packageDirs.length, paths.length);
-				this.packageDirs = pathCache;
+				this.packageDirs = ArrayUtils.megere(packageDirs, paths);
 			}
 		}
 	}
@@ -71,52 +68,49 @@ public class PackageScanner {
 	public void doScanner(final ClassInter inter) {
 		if(this.packageDirs==null)
 			this.addScanPath(ResourceManager.classPath());
-		String sourcePath = null;
-		String packagePathName;
-		String scannerPath = null;
-		String resourcePathName;
-		String filter = null;
 		for (String packDir : packageDirs) {
 			if (packDir == null)
 				continue;
-			if(packDir.indexOf(":")!=-1||packDir.startsWith("/")) {
-				int fiIndex = packDir.lastIndexOf("/");
-//				int stIndex = packDir.indexOf("!");
-//				int packMark = packDir.indexOf(".",stIndex>fiIndex?stIndex:fiIndex);
-				if(fiIndex!=-1) {
-					sourcePath = packDir.substring(0,fiIndex);//资源目录
-					packagePathName = packDir.substring(fiIndex);
-				}else {
-					sourcePath = packDir;//资源目录
-					packagePathName = "";
-				}
-			}else {
-				sourcePath = ResourceManager.classPath();//资源目录
-				packagePathName = packDir;
-			}
-			String scannerPathName = sourcePath+packagePathName.replace('.', '/');
-			int filterIndex = getMarkIndex(scannerPathName, 0);
-			if(filterIndex>-1) {
-				filter = scannerPathName;
-				scannerPathName = scannerPathName.substring(0,StringUtil.lastIndexOf(scannerPathName,'\\','/'));
-			}
-			scannerPath= scannerPathName;//扫描路径
-			resourcePathName = sourcePath;
-			if(!StringUtil.endsWith(resourcePathName,'/')) {
-				resourcePathName+='/';
-			}
-			this.scanner(scannerPath,resourcePathName,inter,filter);
+			String packReplace = packDir.replace(".", "/");
+			String[] paths = ResourceManager.getPathExress(packReplace);
+			this.doScanner(paths,inter);
 		}
 	}
-	private void scanner(String path,String resourcePath,ClassInter inter, String filter) {
+	private void doScanner(String[] paths, ClassInter inter) {
+		//扫描位置 过滤类型 类路径
+		String scannerPath,classPath = null;
+		for(String path : paths) {
+			//jar里的资源
+			int jarIndex = path.indexOf(JAR_SUFFIX);
+			if(jarIndex != -1) {
+				classPath = scannerPath = path.substring(0,jarIndex+JAR_SUFFIX.length());
+			}else {
+				for(String classpath : ResourceManager.classPaths()) {
+					if(path.startsWith(classpath)) 
+						classPath = classpath;
+				}
+				if(classPath == null)
+					throw new IllegalArgumentException("cloud not found class path for "+path);
+				int maxIndex = Math.max(path.indexOf("?"), path.indexOf("*"));
+				if(maxIndex != -1) {
+					scannerPath = path.substring(0,maxIndex);
+					scannerPath = path.substring(0,scannerPath.lastIndexOf("/"));
+				}else {
+					scannerPath = path.substring(0,path.lastIndexOf("/"));
+				}
+			}
+			this.scanner(scannerPath,classPath,inter,path);
+		}
+	}
+	private void scanner(String path,String classPath,ClassInter inter, String filter) {
 		ResourceScanner scanner = new ResourceScanner(path);
 		if(filter != null)
-			scanner.filter(filter);
+			scanner.filter(filter+".class");
 		scanner.scanner(new ResourceInter(){
 			@Override
 			public void find(Resource resourceEntry) {
-				if(resourceEntry.getName().endsWith(".class") && resourceEntry.getName().indexOf("$") == -1){
-					String className = resourceEntry.getPath().replace(resourcePath, "").replace("\\","." ).replace("/", ".").replace(".class", "");
+				if(resourceEntry.getName().indexOf("$") == -1){
+					String className = resourceEntry.getPath().replace(classPath, "").replace("\\","." ).replace("/", ".").replace(".class", "");
 					className= className.substring(0, 1).equals(".")?className.substring(1, className.length()):className;
 					try {
 						inter.find(Class.forName(className));

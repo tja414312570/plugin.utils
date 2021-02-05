@@ -67,12 +67,15 @@ public class ResourceScanner {
 			JarFile jarFile = new JarFile(file);
 			jarFile.stream().forEach((jarEntry)->{
 				String fileName =  jarEntry.getName();
+				if(fileName.endsWith("/"))
+					fileName = fileName.substring(0,fileName.length()-1);
+				String path = file.getAbsolutePath()+"!/"+fileName;
 				int fileNameIndex = fileName.lastIndexOf("/");
 				if(fileNameIndex>-1) {
 					fileName = fileName.substring(fileNameIndex+1);
 				}
 				Resource abstractResourceEntry = 
-						new ClassPathResource(file.getAbsolutePath()+"!/"+jarEntry.getName(),fileName, this.
+						new ClassPathResource(path,fileName, this.
 								file.getAbsolutePath(), 
 								jarEntry,Thread.currentThread().getContextClassLoader());
 				this.find(p,abstractResourceEntry);

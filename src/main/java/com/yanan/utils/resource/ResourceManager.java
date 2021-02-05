@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -43,10 +44,26 @@ public class ResourceManager {
 		}
 		cpIndex = pathExpress.indexOf(CLASSPATHS_EXPRESS);
 		if (cpIndex > -1) {
-			String[] temp = new String[classPaths().length];
-			for (int i = 0; i < temp.length; i++)
-				temp[i] = classPaths()[i] + pathExpress.substring(cpIndex + CLASSPATHS_EXPRESS.length());
-			return temp;
+			//判断classpath*:第一个路径是否为绝对路径
+			String firstAbsolute = getFirstAbsoulte(cpIndex+CLASSPATHS_EXPRESS.length(), pathExpress);
+			if(!StringUtil.isEmpty(firstAbsolute)) {
+				try {
+					Enumeration<URL> urls =  Thread.currentThread().getContextClassLoader().getResources(firstAbsolute);
+					List<String> list = new ArrayList<>();
+					while(urls.hasMoreElements()) {
+						list.add(processPath(urls.nextElement().getPath()+pathExpress.substring(cpIndex+CLASSPATHS_EXPRESS.length()+firstAbsolute.length())));
+					}
+					return list.toArray(new String[list.size()]);
+				} catch (IOException e) {
+					throw new ResourceNotFoundException("failed to get project director", e);
+				}
+			}else {
+				String[] temp = new String[classPaths().length];
+				for (int i = 0; i < temp.length; i++) {
+					temp[i] = classPaths()[i] + pathExpress.substring(cpIndex + CLASSPATHS_EXPRESS.length());
+				}
+				return temp;
+			}
 		}
 		cpIndex = pathExpress.indexOf(PROJECT_EXPRESS);
 		if (cpIndex > -1) {
@@ -57,6 +74,21 @@ public class ResourceManager {
 			}
 		}
 		return new String[] { pathExpress };
+	}
+
+	private static String getFirstAbsoulte(int cpIndex, String pathExpress) {
+		int splitIndex = -1;
+		for(int i = cpIndex;i<pathExpress.length();i++) {
+			if(pathExpress.charAt(i) == '*' || pathExpress.charAt(i) == '?') {
+				if(splitIndex == -1)
+					return null;
+				return pathExpress.substring(cpIndex,splitIndex);
+			}
+			if(pathExpress.charAt(i) == '/') {
+				splitIndex = i;
+			}
+		}
+		return pathExpress.substring(cpIndex);
 	}
 
 	/**
@@ -107,10 +139,12 @@ public class ResourceManager {
 			if (index == -1) {
 				Resource resource ;
 				//普通文件直接返回了
-				if(pathExpress.indexOf(".jar!") == -1) {
+				if(pathResult.indexOf(".jar!") == -1) {
 					File file = new File(pathResult);
-					resource = new FileResource(file);
-					result.add(resource);
+					if(file.exists()) {
+						resource = new FileResource(file);
+						result.add(resource);
+					}
 					continue;
 				}
 				index = pathResult.length();
@@ -197,14 +231,18 @@ public class ResourceManager {
 				}
 				ClassLoader loader = Thread.currentThread().getContextClassLoader();
 				String path = null;
-				
 				while (loader != null) {
-					URL url = loader.getResource("");
-					if(url != null) {
-						path = processPath(loader.getResource("").getPath());
-						if (!temp.contains(path))
-							temp.add(path);
+					try {
+						Enumeration<URL> urls = loader.getResources(".");
+						while(urls.hasMoreElements()) {
+							path = processPath(urls.nextElement().getPath());
+							if (!temp.contains(path))
+								temp.add(path);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+					
 					loader = loader.getParent();
 				}
 				classPaths = temp.toArray(new String[] {});
@@ -295,6 +333,8 @@ public class ResourceManager {
 				path = path.replace('\\', '/');
 			}
 		}
+		if(path.startsWith("file:"))
+			path = path.substring(5);
 		return path.replace("%20", " ");
 	}
 }
