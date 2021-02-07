@@ -320,7 +320,7 @@ iterator: while (index < express.length()) {
 				}
 			}
 		}
-		return true;
+		return StringUtil.isEmpty(resource);
 	}
 
 	
