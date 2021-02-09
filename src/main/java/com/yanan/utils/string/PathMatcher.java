@@ -277,7 +277,8 @@ iterator: while (index < express.length()) {
 						if (StringUtil.indexOf(ma,'/') != -1) {
 							return false;
 						}
-							token.setValue(ma);
+						token.setValue(ma);
+						resource = null;
 					}
 					break;
 				case 2:// **
@@ -299,7 +300,8 @@ iterator: while (index < express.length()) {
 					} else {
 						var = resource;
 					}
-						token.setValue(var);
+					token.setValue(var);
+					resource = resource.substring(var.length());
 					break;
 				case 3:// ?
 					if (token.getToken().length() > resource.length()) {
