@@ -15,7 +15,7 @@ public class ByteUtils {
 	   *      整数 
 	   * @return byte数组 
 	   */
-	  public static byte[] intToByte(int i) { 
+	  public static byte[] intToBytes(int i) { 
 	    byte[] num = new byte[4]; 
 	    num[3] = (byte) (i & 0xFF); 
 	    num[2] = (byte) (i >> 8 & 0xFF); 
@@ -31,7 +31,7 @@ public class ByteUtils {
 	   *      long整数 
 	   * @return byte数组 
 	   */
-	  public static byte[] longToByte(long lo) { 
+	  public static byte[] longToBytes(long lo) { 
 	    byte[] num = new byte[8]; 
 	    for (int i = 0; i < 8; i++) { 
 	      int offset = (num.length - 1 - i) * 8; 
@@ -47,7 +47,7 @@ public class ByteUtils {
 	   *      short整数 
 	   * @return byte数组 
 	   */
-	  public static byte[] unsignedShortToByte(int s) { 
+	  public static byte[] unsignedShortToBytes(int s) { 
 	    byte[] num = new byte[2]; 
 	    num[0] = (byte) (s >> 8 & 0xFF); 
 	    num[1] = (byte) (s & 0xFF); 
@@ -61,8 +61,8 @@ public class ByteUtils {
 	   *      byte数组 
 	   * @return short整数 
 	   */
-	  public static int byteToUnsignedShort(byte[] bytes) { 
-	    return byteToUnsignedShort(bytes, 0); 
+	  public static int bytesToUnsignedShort(byte[] bytes) { 
+	    return bytesToUnsignedShort(bytes, 0); 
 	  } 
 	  
 	  /** 
@@ -74,7 +74,7 @@ public class ByteUtils {
 	   *      开始位置 
 	   * @return short整数 
 	   */
-	  public static int byteToUnsignedShort(byte[] bytes, int off) { 
+	  public static int bytesToUnsignedShort(byte[] bytes, int off) { 
 	    int high = bytes[off]; 
 	    int low = bytes[off + 1]; 
 	    return (high << 8 & 0xFF00) | (low & 0xFF); 
@@ -88,7 +88,7 @@ public class ByteUtils {
 	   *      开始位置 
 	   * @return int整数 
 	   */
-	  public static int byteToInt(byte[] bytes, int off) { 
+	  public static int bytesToInt(byte[] bytes, int off) { 
 	    int b0 = bytes[off] & 0xFF; 
 	    int b1 = bytes[off + 1] & 0xFF; 
 	    int b2 = bytes[off + 2] & 0xFF; 
@@ -103,8 +103,8 @@ public class ByteUtils {
 	   *      开始位置 
 	   * @return int整数 
 	   */
-	  public static int byteToInt(byte[] bytes) { 
-	    return byteToInt(bytes,0); 
+	  public static int bytesToInt(byte[] bytes) { 
+	    return bytesToInt(bytes,0); 
 	  } 
 	  /** 
 	   * byte数组转换为long 
@@ -114,8 +114,22 @@ public class ByteUtils {
 	   * @return long整数 
 	   */
 	  public static long bytesToLong(byte[] bytes) { 
-		  ByteBuffer buffer = ByteBuffer.allocate(8); 
-		  buffer.put(bytes, 0, bytes.length); 
-		  return buffer.getLong(); 
+		  return bytesToLong(bytes,0); 
+	  }
+	  /** 
+	   * byte数组转换为long 
+	   * 
+	   * @param bytes 
+	   *      byte数组 
+	   * @return long整数 
+	   */
+	  public static long bytesToLong(byte[] bytes,int offset) { 
+		  	long num = 0;
+		  	int len = offset + 8;
+	        for (int i = offset; i < len; ++i) {
+	            num <<= 8;
+	            num |= (bytes[i] & 0xff);
+	        }
+	        return num;
 	  }
 }
