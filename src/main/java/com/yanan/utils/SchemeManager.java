@@ -32,7 +32,6 @@ public class SchemeManager implements Runnable{
 		while(schemePools.size()>0&&available){
 			Thread thread = this.getExecuteThreader();
 			thread.start();
-			System.out.println(thread);
 		}//执行完毕后，需要释放线程
 		this.available=false;
 	}
@@ -57,12 +56,10 @@ public class SchemeManager implements Runnable{
 	
 	//释放线程
 	public synchronized void release(String id){
-		System.out.println("释放："+id);
 		for(Thread thread : busyPools)
 			if(thread.getName().equals(id)){
 				this.busyPools.remove(thread);
 				this.threadPools.add(thread);
-				System.out.println(id+":"+thread.isAlive());
 				break;
 			}
 		notify();
@@ -90,7 +87,6 @@ public class SchemeManager implements Runnable{
 		this.schemePools.add(scheme);
 		if(!this.available){
 			this.available = true;
-			System.out.println(this.damon.getState());
 			this.damon.start();
 		}
 			
