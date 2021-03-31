@@ -773,7 +773,7 @@ public class AppClassLoader extends ClassLoader{
 				}
 			}
 	}
-	@SuppressWarnings({ "restriction", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public static <T> T deepClone(Class<T> targetClass,Object source) throws InstantiationException {
 		if(source == null)
 			return null;

@@ -644,4 +644,16 @@ public class ReflectUtils {
 		Class<?> outerClass = Class.forName(className);
 		return outerClass;
 	}
+
+	public static StackTraceElement getStackTraceElement(int i) {
+		StackTraceElement[] stacks = new RuntimeException().getStackTrace();
+		return stacks[i+2];
+	}
+	public static Class<?> getStackTraceClass(int i) {
+		try {
+			return ClassInfoCache.classForName(getStackTraceElement(i).getClassName());
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
 }
