@@ -98,7 +98,7 @@ public class ResourceManager {
 	 * @return 具体的路径
 	 */
 	public static String[] getPathExress(String[] pathExpressArray) {
-		Assert.isNull(pathExpressArray);
+		Assert.isNotNull(pathExpressArray);
 		List<String> pathList = new ArrayList<>();
 		for (String pathExpress : pathExpressArray) {
 			String[] paths = getPathExress(pathExpress);
@@ -306,7 +306,7 @@ public class ResourceManager {
 	 * @param contextClass 上下文类
 	 */
 	public static void addClassPath(Class<?>... contextClass) {
-		Assert.isTrue( contextClass.length == 0, "content class is null");
+		Assert.isFalse(contextClass.length == 0, "content class is null");
 		String classpaths[] = getClassPath(contextClass);
 		addClassPath(classpaths);
 	}

@@ -160,7 +160,7 @@ iterator: while (index < express.length()) {
 				}
 				// 截取变量部分
 				sufIndex = express.indexOf("}", preIndex);
-				Assert.isTrue(sufIndex < 0,new RuntimeException("express " + express + " error,the Variable descriptors are not equal,please check "));
+				Assert.isFalse(sufIndex < 0,new RuntimeException("express " + express + " error,the Variable descriptors are not equal,please check "));
 				String exp = "*";
 				String variable = express.substring(preIndex + 1, sufIndex);
 				// 新建一个Token

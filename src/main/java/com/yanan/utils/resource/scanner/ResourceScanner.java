@@ -45,12 +45,12 @@ public class ResourceScanner {
 		}
 		// 添加事件
 		File file = new File(source);
-		Assert.isFalse(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
+		Assert.isTrue(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 
 	public ResourceScanner(File file) {
-		Assert.isFalse(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
+		Assert.isTrue(file.exists(),new IllegalArgumentException("resource path invalid：" + file.toString()));
 		this.file = file;
 	}
 

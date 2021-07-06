@@ -83,7 +83,7 @@ public class Assert {
 	 * @param throwable custom exception
 	 */
 	public static void isTrue(final boolean bol,RuntimeException throwable) {
-		if(bol) {
+		if(!bol) {
 			throw throwable;
 		}
 	}
