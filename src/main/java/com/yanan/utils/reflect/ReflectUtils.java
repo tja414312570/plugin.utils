@@ -3,6 +3,7 @@ package com.yanan.utils.reflect;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -333,9 +334,17 @@ public class ReflectUtils {
 	 * @throws InvocationTargetException ex
 	 */
 	public static Object invokeMethod(Object instance,Method method,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		method.setAccessible(true);
-		Object result = method.invoke(instance, args);
-		method.setAccessible(false);
+		Object result;
+		if(Modifier.isPublic(method.getModifiers())) {
+			result = method.invoke(instance, args);
+		}else {
+			try {
+				method.setAccessible(true);
+				result = method.invoke(instance, args);
+			}finally {
+				method.setAccessible(false);
+			}
+		}
 		return result;
 	}
 	/**
@@ -492,9 +501,17 @@ public class ReflectUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T getFieldValue(Field field, Object instance)
 			throws IllegalArgumentException, IllegalAccessException {
-		field.setAccessible(true);
-		Object result = field.get(instance);
-		field.setAccessible(false);
+		Object result ;
+		if(Modifier.isPublic(field.getModifiers())) {
+			result = field.get(instance);
+		}else {
+			try {
+				field.setAccessible(true);
+				result = field.get(instance);
+			}finally {
+				field.setAccessible(false);
+			}
+		}
 		return (T) result;
 	}
 	/**
@@ -539,9 +556,17 @@ public class ReflectUtils {
 	 */
 	public static void setFieldValue(Field field, Object instance,Object value)
 			throws IllegalArgumentException, IllegalAccessException {
-		field.setAccessible(true);
-		field.set(instance, value);
-		field.setAccessible(false);
+		if(Modifier.isPublic(field.getModifiers())) {
+			field.set(instance, value);
+		}else {
+			try {
+				field.setAccessible(true);
+				field.set(instance, value);
+			}finally {
+				field.setAccessible(false);
+			}
+		}
+		
 	}
 	/**
 	 * 设置属性值
