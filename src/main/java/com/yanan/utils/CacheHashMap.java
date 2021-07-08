@@ -22,7 +22,7 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 	private static final long serialVersionUID = -270398289030880480L;
 
 	public CacheHashMap() {
-		this(new TypeToken<SoftReference<K>>() {
+		this(new TypeToken<SoftReference<Object>>() {
 		}.getTypeClass());
 	}
 
