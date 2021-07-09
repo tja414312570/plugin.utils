@@ -288,7 +288,7 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		}
 		// 弱引用
 		if (referenceClass.equals(SoftReference.class)) {
-			return (N) new WeakReference(object);
+			return (N) new SoftReference(object);
 		}
 		throw new UnsupportedOperationException("the reference class is not support " + referenceClass);
 	}
