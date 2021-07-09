@@ -91,10 +91,6 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 					|| (key != null && key.equals(k))))
 				e = p;
 			else if (p instanceof TreeNode) {
-				/**
-				 * 这里待处理
-				 */
-//				System.err.println("待处理");
 				e = ((TreeNode<Object, Object>) p).putTreeVal(this, tab, hash, key, value);
 			} else {
 				for (int binCount = 0;; ++binCount) {
