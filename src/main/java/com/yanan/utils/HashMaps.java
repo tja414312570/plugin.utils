@@ -1027,10 +1027,10 @@ public class HashMaps<K,V> extends AbstractMap<K,V>
         return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;
     }
 
-    final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+    class EntrySet extends AbstractSet<Map.Entry<K,V>> {
         public final int size()                 { return size; }
         public final void clear()               { HashMaps.this.clear(); }
-        public final Iterator<Map.Entry<K,V>> iterator() {
+        public Iterator<Map.Entry<K,V>> iterator() {
             return new EntryIterator();
         }
         public final boolean contains(Object o) {
@@ -1471,7 +1471,7 @@ public class HashMaps<K,V> extends AbstractMap<K,V>
             return e;
         }
 
-        public final void remove() {
+        public void remove() {
             Node<K,V> p = current;
             if (p == null)
                 throw new IllegalStateException();
@@ -1494,7 +1494,7 @@ public class HashMaps<K,V> extends AbstractMap<K,V>
         public final V next() { return nextNode().value; }
     }
 
-    final class EntryIterator extends HashIterator
+    class EntryIterator extends HashIterator
         implements Iterator<Map.Entry<K,V>> {
         public final Map.Entry<K,V> next() { return nextNode(); }
     }
