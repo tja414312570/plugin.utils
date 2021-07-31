@@ -3,12 +3,17 @@ package com.yanan.utils;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yanan.utils.reflect.TypeToken;
 
 /**
- * 缓存表，使用java的引用原理实现 
- * ！！！对字符串无效
+ * 缓存表，使用java的引用原理实现 ！！！对字符串无效
+ * 
  * @author yanan
  * @param <K>
  * @param <V>
@@ -20,6 +25,9 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 	 * 
 	 */
 	private static final long serialVersionUID = -270398289030880480L;
+	private int modifyCount = 2048;
+	private AtomicInteger atomicInteger = new AtomicInteger();
+
 	/**
 	 * 默认构造器，使用软引用作为引用类型
 	 */
@@ -27,15 +35,61 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		this(new TypeToken<SoftReference<Object>>() {
 		}.getTypeClass());
 	}
+
 	/**
 	 * 使用一个引用类型作为缓存的引用类型
+	 * 
 	 * @param reference 引用类
 	 */
 	public CacheHashMap(Class<? extends Reference<?>> reference) {
 		this(reference, reference);
 	}
+
+	public Set<Map.Entry<Object, Object>> entrySet() {
+		Set<Map.Entry<Object, Object>> es;
+		return (es = entrySet) == null ? (entrySet = new CacheEntrySet()) : es;
+	}
+
+	class CacheEntrySet extends EntrySet {
+		public final Iterator<Entry<Object, Object>> iterator() {
+			return new CacheEntryIterator();
+		}
+	}
+	class CacheEntryIterator extends EntryIterator
+	    implements Iterator<Map.Entry<Object,Object>> {
+		 public final void remove() {
+	            Node<Object,Object> p = super.current;
+	            if (p == null)
+	                throw new IllegalStateException();
+	            if (modCount != expectedModCount)
+	                throw new ConcurrentModificationException();
+	            current = null;
+	            Object key = p.key;
+	            removeNode(p.hash, key, null, false, false);
+	            expectedModCount = modCount;
+	        }
+	}
+	synchronized void checkNode() {
+		if (atomicInteger.getAndIncrement() >= modifyCount) {
+			atomicInteger.set(0);
+			Iterator<Entry<Object, Object>> iterator = this.entrySet().iterator();
+			AtomicInteger ai = new AtomicInteger();
+			while (iterator.hasNext()) {
+				Entry<Object, Object> entry = iterator.next();
+				if (referenceToObj(this.referenceKeyClass, entry.getKey()) == null
+						|| referenceToObj(this.referenceValClass, entry.getValue()) == null) {
+					iterator.remove();
+					ai.incrementAndGet();
+//					System.err.println("清理:"+referenceToObj(this.referenceKeyClass, entry.getKey())+"==>"+referenceToObj(this.referenceKeyClass, entry.getKey()));
+				}
+			}
+		}
+
+	}
+
 	/**
 	 * 分别是用引用类型对缓存的key和value进行设置
+	 * 
 	 * @param keyReferenceClass
 	 * @param valReferenceClass
 	 */
@@ -45,30 +99,35 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		this.referenceKeyClass = (Class<? extends Reference<K>>) keyReferenceClass;
 		this.referenceValClass = (Class<? extends Reference<V>>) valReferenceClass;
 	}
+
 	/**
-	 * 不支持次方法
-	 * 因为不能对key和value进行限制
+	 * 不支持次方法 因为不能对key和value进行限制
 	 */
 	@Override
-	public V put(Object key,Object value) {
+	public V put(Object key, Object value) {
 		throw new UnsupportedOperationException("please use [puts] method");
 	}
+
 	/**
 	 * 用来代替put方法
-	 * @param key map的key
+	 * 
+	 * @param key   map的key
 	 * @param value map的value
 	 * @return 旧值
 	 */
 	public V puts(K key, V value) {
+		checkNode();
 		return putVals(hash(key), key, value, false, true);
 	}
+
 	/**
 	 * 用以替换putVal方法
-	 * @param hash hash值
-	 * @param key key
-	 * @param value value
+	 * 
+	 * @param hash         hash值
+	 * @param key          key
+	 * @param value        value
 	 * @param onlyIfAbsent 不管
-	 * @param evict 不管
+	 * @param evict        不管
 	 * @return 旧值
 	 */
 	@SuppressWarnings("unchecked")
@@ -84,6 +143,7 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		if ((p = tab[i = (n - 1) & hash]) == null) {
 			Object refKey = objToReference(this.referenceKeyClass, key);
 			tab[i] = newNode(hash, refKey, refValue, null);
+//			System.err.println(referenceToObj(this.referenceKeyClass,tab[i].key)+"==>"+i+"==>"+key);
 		} else {
 			Node<Object, Object> e = null;
 			K k;
@@ -121,9 +181,11 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		afterNodeInsertion(evict);
 		return null;
 	}
+
 	/**
-	 * 依据treeifyBins方法，用于处理红黑树节点 
-	 * @param tab 节点表
+	 * 依据treeifyBins方法，用于处理红黑树节点
+	 * 
+	 * @param tab  节点表
 	 * @param hash hash值
 	 */
 	final void treeifyBins(Node<Object, Object>[] tab, int hash) {
@@ -147,13 +209,14 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 				hd.treeify(tab);
 		}
 	}
-	
+
 	/**
 	 * 依据父类replaceMentTreeNode方法
 	 */
 	TreeNode<Object, Object> replacementTreeNode(Node<Object, Object> p, Node<Object, Object> next) {
-		return new CacheTreeNode(p.hash, p.key, p.value, next,this);
+		return new CacheTreeNode(p.hash, p.key, p.value, next, this);
 	}
+
 	/**
 	 * 参考父类 get 方法
 	 */
@@ -162,14 +225,17 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		Node<Object, Object> e;
 		return (e = getNode(hash(key), key)) == null ? null : (V) referenceToObj(this.referenceValClass, e.value);
 	}
+
 	/**
 	 * 参考父类remove方法
 	 */
 	@SuppressWarnings("unchecked")
 	public V remove(Object key) {
 		Node<Object, Object> e;
-		return (e = removeNode(hash(key), key, null, false, true)) == null ? null : (V) referenceToObj(this.referenceValClass, e.value);
+		return (e = removeNode(hash(key), key, null, false, true)) == null ? null
+				: (V) referenceToObj(this.referenceValClass, e.value);
 	}
+
 	/**
 	 * 参考父类 remove node 方法
 	 */
@@ -181,7 +247,7 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 			Node<Object, Object> node = null, e;
 			Object k;
 			Object v;
-			if (p.hash == hash && ((k = referenceToObj(referenceKeyClass, p.key)) == key || (key != null && key.equals(k))))
+			if (p.hash == hash && ((k = p.key) == key || (key != null && key.equals(k))))
 				node = p;
 			else if ((e = p.next) != null) {
 				if (p instanceof TreeNode)
@@ -211,10 +277,12 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		}
 		return null;
 	}
+
 	/**
 	 * 获取节点方法
+	 * 
 	 * @param hash 节点hash值
-	 * @param key 节点的key
+	 * @param key  节点的key
 	 * @return 节点
 	 */
 	@SuppressWarnings("unchecked")
@@ -224,6 +292,7 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		int n;
 		K k;
 		if ((tab = table) != null && (n = tab.length) > 0 && (first = tab[(n - 1) & hash]) != null) {
+//			System.err.println(key+"==>"+referenceToObj(this.referenceKeyClass, first.key)+"===->"+referenceToObj(this.referenceValClass, first.value));
 			if (first.hash == hash && // always check first node
 					((k = (K) referenceToObj(this.referenceKeyClass, first.key)) == key
 							|| (key != null && key.equals(k))))
@@ -241,12 +310,14 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		}
 		return null;
 	}
+
 	/**
 	 * 引用到对象
-	 * @param <M> 返回类型
-	 * @param <N> 引用类型
+	 * 
+	 * @param <M>            返回类型
+	 * @param <N>            引用类型
 	 * @param referenceClass 引用类实现
-	 * @param ref 应用对象
+	 * @param ref            应用对象
 	 * @return 对象
 	 */
 	@SuppressWarnings({ "unchecked" })
@@ -255,11 +326,13 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 			return (M) ((Reference<?>) ref).get();
 		return (M) ref;
 	}
+
 	/**
 	 * 对象转引用
-	 * @param <N> 引用类型
+	 * 
+	 * @param <N>            引用类型
 	 * @param referenceClass 引用类实现
-	 * @param obj 原始对象
+	 * @param obj            原始对象
 	 * @return 引用对象
 	 */
 	private <N extends Reference<?>> Object objToReference(Class<N> referenceClass, Object obj) {
@@ -267,11 +340,13 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 			return obj;
 		return getRefernce(this.referenceKeyClass, obj);
 	}
+
 	/**
 	 * 将对象转引用
-	 * @param <N> 引用类型
+	 * 
+	 * @param <N>            引用类型
 	 * @param referenceClass 引用类实现
-	 * @param object 原始对象
+	 * @param object         原始对象
 	 * @return 引用对象
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -294,6 +369,15 @@ public class CacheHashMap<K, V> extends HashMaps<Object, Object> {
 		return "CacheHashMap [referenceKeyClass=" + referenceKeyClass + ", referenceValClass=" + referenceValClass + "]"
 				+ super.toString();
 	}
+
+	public int getModifyCount() {
+		return modifyCount;
+	}
+
+	public void setModifyCount(int modifyCount) {
+		this.modifyCount = modifyCount;
+	}
+
 	/**
 	 * 
 	 * @author yanan

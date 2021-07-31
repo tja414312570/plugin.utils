@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  *
  * @param <T> the generic type
  */
-public class TypeToken<T> {
+public abstract class TypeToken<T> {
 	private Type type;
 	public TypeToken() {
 		Type genericSuperclass = getClass().getGenericSuperclass();
