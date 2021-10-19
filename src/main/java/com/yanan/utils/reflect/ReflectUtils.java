@@ -1,5 +1,6 @@
 package com.yanan.utils.reflect;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -680,5 +681,37 @@ public class ReflectUtils {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
+	}
+	public static Class<?>[] getActualType(Type type){
+		if (type == null || type instanceof Class) {
+			throw new RuntimeException("Missing type parameter.");
+		}
+		if (type instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType) type;
+			Type[] types = pt.getActualTypeArguments();
+			if (types != null && types.length > 0) {
+				Class<?>[] classes = new Class<?>[types.length];
+				for (int i = 0; i < classes.length; i++) {
+					classes[i] = (Class<?>) types[i];
+				}
+				return classes;
+			}
+		}
+		return null;
+	}
+	public static Class<?>[] getParameterizedType(Field field) {
+		Type type = field.getGenericType(); 
+		return getActualType(type);
+	}
+	public static Class<?>[] getParameterizedType(Parameter parameter) {
+		Type type = parameter.getParameterizedType();
+		return getActualType(type);
+	}
+	public static Class<?>[] getParameterizedType(AnnotatedElement parameter) {
+		if(parameter instanceof Field)
+			return getParameterizedType((Field) parameter);
+		if(parameter instanceof Parameter)
+			return getParameterizedType((Parameter) parameter);
+		throw new IllegalArgumentException();
 	}
 }
