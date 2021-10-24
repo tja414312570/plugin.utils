@@ -399,6 +399,8 @@ iterator: while (index < express.length()) {
 		private String name;
 		private String value;
 		private int type;
+		public final static int TYPE_VARIABLE = 1;
+		public final static int TYPE_DEFAULT = 0;
 
 		public String getToken() {
 			return token;

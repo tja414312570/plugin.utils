@@ -8,6 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.yanan.utils.string.StringUtil;
+
 
 /**
  * 参数工具，提供类的获取等等一系列功能
@@ -260,45 +262,45 @@ public class ParameterUtils{
 			return arg;
 		// 8个基本数据类型及其包装类型
 		if (clzz.equals(int.class))
-			return arg == null ? 0 : Integer.parseInt(arg);
+			return StringUtil.isEmpty(arg) ? 0 : Integer.parseInt(arg);
 		if (clzz.equals(Integer.class))
-			return arg == null ? null : Integer.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Integer.valueOf(arg);
 
 		if (clzz.equals(boolean.class))
-			return arg == null ? false : Boolean.parseBoolean(arg);
+			return StringUtil.isEmpty(arg) ? false : Boolean.parseBoolean(arg);
 		if (clzz.equals(Boolean.class))
-			return arg == null ? null : Boolean.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Boolean.valueOf(arg);
 
 		if (clzz.equals(float.class))
-			return arg == null ? 0.0f : Float.parseFloat(arg);
+			return StringUtil.isEmpty(arg) ? 0.0f : Float.parseFloat(arg);
 		if (clzz.equals(Float.class))
-			return arg == null ? null : Float.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Float.valueOf(arg);
 
 		if (clzz.equals(short.class))
-			return arg == null ? 0 : Short.parseShort(arg);
+			return StringUtil.isEmpty(arg) ? 0 : Short.parseShort(arg);
 		if (clzz.equals(Short.class))
-			return arg == null ? null : Short.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Short.valueOf(arg);
 
 		if (clzz.equals(long.class))
-			return arg == null ? 0l : Long.parseLong(arg);
+			return StringUtil.isEmpty(arg) ? 0l : Long.parseLong(arg);
 		if (clzz.equals(Long.class))
-			return arg == null ? null : Long.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Long.valueOf(arg);
 
 		if (clzz.equals(double.class))
-			return arg == null ? 0.0f : Double.parseDouble(arg);
+			return StringUtil.isEmpty(arg) ? 0.0f : Double.parseDouble(arg);
 		if (clzz.equals(Double.class))
-			return arg == null ? null : Double.valueOf(arg);
+			return StringUtil.isEmpty(arg) ? null : Double.valueOf(arg);
 
 		if (clzz.equals(char.class))
-			return arg == null ? null : arg.charAt(0);
+			return StringUtil.isEmpty(arg) ? null : arg.charAt(0);
 		if (clzz.equals(Character.class))
-			return arg == null ? null : Character.valueOf(arg.charAt(0));
+			return StringUtil.isEmpty(arg) ? null : Character.valueOf(arg.charAt(0));
 
 		if (clzz.equals(char[].class))
-			return arg == null ? null : arg.toCharArray();
+			return StringUtil.isEmpty(arg) ? null : arg.toCharArray();
 
 		if (clzz.equals(byte.class) || clzz.equals(Byte.class))
-			return arg == null ? null : Byte.parseByte(arg);
+			return StringUtil.isEmpty(arg) ? null : Byte.parseByte(arg);
 		return arg;
 	}
 	/**

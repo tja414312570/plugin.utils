@@ -626,7 +626,22 @@ public class ReflectUtils {
 		}
 		return null;
 	}
-
+	/**
+	 * 获取类的指定泛型接口
+	 * 
+	 * @param field the field
+	 * @return 
+	 * @return the generic type
+	 */
+	public static Type getGenericInterface(Class<?> clzz,Class<?> target) {
+		Type[] types = clzz.getGenericInterfaces();
+		for(Type type : types) {
+			if(type instanceof ParameterizedType && ((ParameterizedType)type).getRawType().equals(target)) {
+				return type;
+			}
+		}
+		throw new IllegalStateException();
+	}
 	/**
 	 * 获取Parameter为List的泛型
 	 * 
@@ -683,9 +698,10 @@ public class ReflectUtils {
 		}
 	}
 	public static Class<?>[] getActualType(Type type){
-		if (type == null || type instanceof Class) {
+		if (type == null ) {
 			throw new RuntimeException("Missing type parameter.");
 		}
+		System.err.println(type);
 		if (type instanceof ParameterizedType) {
 			ParameterizedType pt = (ParameterizedType) type;
 			Type[] types = pt.getActualTypeArguments();

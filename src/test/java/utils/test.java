@@ -1,21 +1,25 @@
 package utils;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.yanan.utils.string.PathMatcher;
 import com.yanan.utils.string.PathMatcher.Token;
 
 public class test {
 	public static void main(String[] args) {
-		String str = "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/rt.jar!java/awt/dnd/DropTargetContext.class";
-		String reg = "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/rt.jar!/java/**";
-			
-		
-		
-		System.out.println(PathMatcher.match(reg, str).isMatch());
-		System.out.println("   ");
-		System.out.println(PathMatcher.match(reg, str).variableMap());
-		System.out.println("   ");
-		for(Token token :PathMatcher.match(reg, str).getTokens()) {
-			System.out.println(token.getName()+":"+token.getValue());
+
+		AtomicInteger integer = new AtomicInteger(0);
+		Executor executor = Executors.newFixedThreadPool(10);
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				throw new RuntimeException(integer.getAndIncrement()+"");
+			}
+		};
+		for(int i = 0;i<100;i++) {
+			executor.execute(runnable);
 		}
 		
 	}
