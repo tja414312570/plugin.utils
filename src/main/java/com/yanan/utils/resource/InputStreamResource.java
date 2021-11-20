@@ -3,6 +3,7 @@ package com.yanan.utils.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -61,6 +62,11 @@ public class InputStreamResource implements Resource {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		return inputStream;
+	}
+
+	@Override
+	public URI getURI() {
+		throw new UnsupportedOperationException();
 	}
 
 }

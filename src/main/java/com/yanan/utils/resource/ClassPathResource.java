@@ -3,6 +3,7 @@ package com.yanan.utils.resource;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.jar.JarEntry;
 
@@ -163,5 +164,9 @@ public class ClassPathResource implements Resource {
 	 */
 	public JarEntry getJarEntry() {
 		return jarEntry;
+	}
+	@Override
+	public URI getURI() {
+		throw new UnsupportedOperationException();
 	}
 }

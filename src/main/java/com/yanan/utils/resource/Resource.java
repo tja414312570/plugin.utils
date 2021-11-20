@@ -3,6 +3,7 @@ package com.yanan.utils.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -18,6 +19,11 @@ public interface Resource {
 	 * @return the path
 	 */
 	String getPath();
+	/**
+	 * 获取资源URI
+	 * @return
+	 */
+	URI getURI();
 
 	/**
 	 * 判断资源是否是一个目录
