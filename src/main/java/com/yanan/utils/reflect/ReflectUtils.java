@@ -701,7 +701,6 @@ public class ReflectUtils {
 		if (type == null ) {
 			throw new RuntimeException("Missing type parameter.");
 		}
-		System.err.println(type);
 		if (type instanceof ParameterizedType) {
 			ParameterizedType pt = (ParameterizedType) type;
 			Type[] types = pt.getActualTypeArguments();

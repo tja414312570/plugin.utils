@@ -160,7 +160,6 @@ public class XMLBean {
 			if (!xmlFile.exists()) {
 				this.warrn("a xml file is not exist,ignore the xml file,at : " + xmlFile.getAbsolutePath());
 			} else {
-				// read xmlFile and get document,the love always exists;
 				SAXReader reader = new SAXReader();
 				Document document;
 				try {

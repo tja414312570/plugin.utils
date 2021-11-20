@@ -11,6 +11,7 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import com.yanan.utils.ArrayUtils;
+import com.yanan.utils.CollectionUtils;
 import com.yanan.utils.asserts.Assert;
 import com.yanan.utils.resource.scanner.ResourceScanner;
 import com.yanan.utils.resource.scanner.ResourceScannerException;
@@ -174,7 +175,9 @@ public class ResourceManager {
 	 */
 	public static Resource getResource(String pathExpress) {
 		List<Resource> list = getResourceList(pathExpress);
-		return list == null || list.isEmpty() ? null : list.get(0);
+		if(CollectionUtils.isEmpty(list) || list.size() > 1)
+			throw new ResourceNotFoundException("resource is not exist at "+pathExpress);
+		return list.get(0);
 	}
 
 	/*

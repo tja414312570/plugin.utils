@@ -121,9 +121,10 @@ public class PackageScanner {
 					try {
 						inter.find(Class.forName(className));
 					} catch (Throwable e) {
-						e.printStackTrace();
 						if(!ignoreLoadingException)
 							throw new RuntimeException("failed to load class \""+className+"\" at class file \""+resourceEntry.getPath()+"\"",e);
+						else
+							e.printStackTrace();
 					}
 				}
 				

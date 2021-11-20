@@ -142,6 +142,30 @@ iterator: while (index < express.length()) {
 		int index = 0;
 		// 分段截取
 		StringBuffer buffer = new StringBuffer();
+		StringBuffer builder = new StringBuffer();
+		int type = 0;
+		for(int i = 0 ;i<express.length();i++) {
+			char chr = express.charAt(i);
+			switch(chr) { 
+			case '?': //0 1
+				type = type | 1;
+				if(type == 1) {
+					builder.append(chr);
+				}
+				break;
+			case '*': // 1 0    1 1 0
+				type = type | 2;
+				if(type  == 2 || type == 6) {
+					builder.append(chr);
+					type = type <<1;
+				}
+				break;
+			default: // 0 0
+				type = 0;
+				builder.append(chr);
+			}
+		}
+		express = builder.toString();
 		int preIndex = 0;
 		int sufIndex = 0;
 		if (express.indexOf("{", sufIndex) == -1) {
@@ -287,14 +311,23 @@ iterator: while (index < express.length()) {
 						nT = iterator.next();
 						int n = 0;
 						String temp;
-						while ((p = resource.indexOf(nT.getToken(), n + 1)) > -1) {
+						while ((p = resource.indexOf(nT.getToken(), n)) > -1) {
 							var = resource.substring(0, p);
 							temp = resource.substring(p + nT.getToken().length());
-							if (matchURI(temp, tokens.subList(tokens.indexOf(nT) + 1, tokens.size()))) {
+							List<Token> subToken = tokens.subList(tokens.indexOf(nT) + 1, tokens.size());
+							if(subToken.size() == 0) {
+								if(temp.length() == 0) {
+									return true;
+								}
+								n = p+1;
+								continue;
+							}
+							if (matchURI(temp, subToken)) {
 									token.setValue(var);
+									
 								return true;
 							}
-							n = p;
+							n = p+1;
 						}
 						return false;
 					} else {
