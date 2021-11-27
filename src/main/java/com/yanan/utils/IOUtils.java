@@ -12,10 +12,25 @@ public class IOUtils {
 		int len = 0;
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(inputStream.available());
-			while((len = inputStream.read(bytes)) != 0) {
+			while((len = inputStream.read(bytes)) > 0) {
 				baos.write(bytes,0,len);
 			}
 			return new String(baos.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException("failed to read stream",e);
+		}finally {
+			close(inputStream);
+		}
+	}
+	public static String toString(InputStream inputStream,String charset){
+		byte[] bytes = new byte[1024];
+		int len = 0;
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(inputStream.available());
+			while((len = inputStream.read(bytes)) > 0) {
+				baos.write(bytes,0,len);
+			}
+			return new String(baos.toByteArray(),charset);
 		} catch (IOException e) {
 			throw new RuntimeException("failed to read stream",e);
 		}finally {

@@ -117,7 +117,7 @@ public class ArrayUtils {
 		if(isEmpty(array2))
 			return null;
 		T[] newArray = (T[]) Array.newInstance(getArrayType(array1.getClass()), 
-				array2.length+array2.length);
+				array1.length+array2.length);
 		System.arraycopy(array1, 0, newArray, 0, array1.length);
 		System.arraycopy(array2, 0, newArray, array1.length, array2.length);
 		return newArray;

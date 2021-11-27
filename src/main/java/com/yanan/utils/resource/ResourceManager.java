@@ -69,7 +69,7 @@ public class ResourceManager {
 		cpIndex = pathExpress.indexOf(PROJECT_EXPRESS);
 		if (cpIndex > -1) {
 			try {
-				return new String[] { projectPath() + pathExpress.substring(cpIndex + PROJECT_EXPRESS.length()) };
+				return new String[] { projectPath() +"/"+ pathExpress.substring(cpIndex + PROJECT_EXPRESS.length()) };
 			} catch (IOException e) {
 				throw new ResourceNotFoundException("failed to get project director", e);
 			}
@@ -175,8 +175,10 @@ public class ResourceManager {
 	 */
 	public static Resource getResource(String pathExpress) {
 		List<Resource> list = getResourceList(pathExpress);
-		if(CollectionUtils.isEmpty(list) || list.size() > 1)
+		if(CollectionUtils.isEmpty(list))
 			throw new ResourceNotFoundException("resource is not exist at "+pathExpress);
+		if(list.size() > 1)
+			throw new ResourceNotFoundException("required one resource but found "+list.size());
 		return list.get(0);
 	}
 
