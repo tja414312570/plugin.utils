@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yanan.utils.reflect.cache.ClassHelper;
 import com.yanan.utils.reflect.cache.ClassInfoCache;
 
 /**
@@ -154,7 +155,7 @@ public class ReflectUtils {
 	 * 
 	 * @param className  类名
 	 * @param methodName 方法名
-	 * @param argTypes  参数类型
+	 * @param argTypes   参数类型
 	 * @return boolean: 是否存在
 	 * @throws ClassNotFoundException 没有类异常
 	 */
@@ -180,9 +181,14 @@ public class ReflectUtils {
 	 */
 	public static boolean hasDeclaredMethod(String className, String methodName, Class<?>... argTypes)
 			throws ClassNotFoundException {
+		Class<?> loadClass = Class.forName(className);
+		hasDeclaredMethod(loadClass, methodName, argTypes);
+		return true;
+	}
+
+	public static boolean hasDeclaredMethod(Class<?> clazz, String methodName, Class<?>... argTypes) {
 		try {
-			Class<?> loadClass = Class.forName(className);
-			loadClass.getDeclaredMethod(methodName, argTypes);
+			clazz.getDeclaredMethod(methodName, argTypes);
 			return true;
 		} catch (NoSuchMethodException e) {
 		}
@@ -198,6 +204,7 @@ public class ReflectUtils {
 	public static String createFieldIsMethod(String fieldName) {
 		return createFieldMethod("is", fieldName);
 	}
+
 	/**
 	 * 创建属性的is方法
 	 * 
@@ -207,11 +214,12 @@ public class ReflectUtils {
 	public static String createFieldIsMethod(Field field) {
 		return createFieldIsMethod(field.getName());
 	}
+
 	/**
 	 * 创建属性的suffix的方法，比如is,bool生成 isBool
 	 * 
 	 * @param suffix 前缀
-	 * @param field 属性名
+	 * @param field  属性名
 	 * @return fieldName的xx方法
 	 */
 	public static String createFieldMethod(String suffix, String fieldName) {
@@ -228,6 +236,7 @@ public class ReflectUtils {
 	public static String createFieldGetMethod(Field field) {
 		return createFieldGetMethod(field.getName());
 	}
+
 	/**
 	 * 创建属性的get方法
 	 * 
@@ -237,6 +246,7 @@ public class ReflectUtils {
 	public static String createFieldGetMethod(String fieldName) {
 		return createFieldMethod("get", fieldName);
 	}
+
 	/**
 	 * 创建属性的set方法
 	 * 
@@ -299,7 +309,7 @@ public class ReflectUtils {
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		Class<?>[] argsTypes = ParameterUtils.getParameterBaseType(args);
-		return invokeStaticMethod(clzz,methodName,argsTypes,args);
+		return invokeStaticMethod(clzz, methodName, argsTypes, args);
 	}
 
 	/**
@@ -322,100 +332,118 @@ public class ReflectUtils {
 		Method method = ClassInfoCache.getClassHelper(clzz).getMethod(methodName, parameterTypes);
 		if (method == null)
 			throw new NoSuchMethodException();
-		return invokeMethod(null,method,args);
+		return invokeMethod(null, method, args);
 	}
+
 	/**
 	 * 调用方法
+	 * 
 	 * @param instance 实例
-	 * @param method 方法
-	 * @param args 参数
+	 * @param method   方法
+	 * @param args     参数
 	 * @return 调用结果
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
+	 * @throws IllegalAccessException    ex
+	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
 	 */
-	public static Object invokeMethod(Object instance,Method method,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public static Object invokeMethod(Object instance, Method method, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		Object result;
-		if(Modifier.isPublic(method.getModifiers())) {
+		if (Modifier.isPublic(method.getModifiers())) {
 			result = method.invoke(instance, args);
-		}else {
+		} else {
 			try {
 				method.setAccessible(true);
 				result = method.invoke(instance, args);
-			}finally {
+			} finally {
 				method.setAccessible(false);
 			}
 		}
 		return result;
 	}
+
 	/**
 	 * 调用方法
-	 * @param instance 实例
+	 * 
+	 * @param instance   实例
 	 * @param methodName 方法
-	 * @param args 参数
+	 * @param args       参数
 	 * @return 调用结果
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
+	 * @throws IllegalAccessException    ex
+	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchMethodException  
+	 * @throws SecurityException         ex
+	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeMethod(Object instance,String methodName,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+	public static Object invokeMethod(Object instance, String methodName, Object... args) throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Class<?>[] types = ParameterUtils.getParameterTypes(args);
 		Method method = instance.getClass().getMethod(methodName, types);
-		return invokeMethod(instance,method,args);
+		return invokeMethod(instance, method, args);
 	}
+
 	/**
 	 * 调用方法
-	 * @param instance 实例
+	 * 
+	 * @param instance   实例
 	 * @param methodName 方法
-	 * @param argsType 参数类型
-	 * @param args 参数
+	 * @param argsType   参数类型
+	 * @param args       参数
 	 * @return 调用结果
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
+	 * @throws IllegalAccessException    ex
+	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchMethodException  
+	 * @throws SecurityException         ex
+	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeMethod(Object instance,String methodName,Class<?>[] argsType,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+	public static Object invokeMethod(Object instance, String methodName, Class<?>[] argsType, Object... args)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
+			SecurityException {
 		Method method = instance.getClass().getMethod(methodName, argsType);
-		return invokeMethod(instance,method,args);
+		return invokeMethod(instance, method, args);
 	}
+
 	/**
 	 * 调用方法
-	 * @param instance 实例
+	 * 
+	 * @param instance   实例
 	 * @param methodName 方法
-	 * @param args 参数
+	 * @param args       参数
 	 * @return 调用结果
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
+	 * @throws IllegalAccessException    ex
+	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchMethodException  
+	 * @throws SecurityException         ex
+	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeDeclaredMethod(Object instance,String methodName,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+	public static Object invokeDeclaredMethod(Object instance, String methodName, Object... args)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
+			SecurityException {
 		Class<?>[] types = ParameterUtils.getParameterTypes(args);
 		Method method = instance.getClass().getDeclaredMethod(methodName, types);
-		return invokeMethod(instance,method,args);
+		return invokeMethod(instance, method, args);
 	}
+
 	/**
 	 * 调用方法
-	 * @param instance 实例
+	 * 
+	 * @param instance   实例
 	 * @param methodName 方法
-	 * @param argsType 参数类型
-	 * @param args 参数
+	 * @param argsType   参数类型
+	 * @param args       参数
 	 * @return 调用结果
-	 * @throws IllegalAccessException ex
-	 * @throws IllegalArgumentException ex
+	 * @throws IllegalAccessException    ex
+	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchMethodException  
+	 * @throws SecurityException         ex
+	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeDeclaredMethod(Object instance,String methodName,Class<?>[] argsType,Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException , SecurityException {
+	public static Object invokeDeclaredMethod(Object instance, String methodName, Class<?>[] argsType, Object... args)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
+			SecurityException {
 		Method method = instance.getClass().getDeclaredMethod(methodName, argsType);
-		return invokeMethod(instance,method,args);
+		return invokeMethod(instance, method, args);
 	}
+
 	/**
 	 * 判断一个类是否继承自某个接口，不支持包含父类继承的接口的继承 eg. class A implements B{}
 	 * implementOf(A.class,B.class) ==》true class A implements B{},class C extends
@@ -502,103 +530,123 @@ public class ReflectUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T getFieldValue(Field field, Object instance)
 			throws IllegalArgumentException, IllegalAccessException {
-		Object result ;
-		if(Modifier.isPublic(field.getModifiers())) {
+		Object result;
+		if (Modifier.isPublic(field.getModifiers())) {
 			result = field.get(instance);
-		}else {
+		} else {
 			try {
 				field.setAccessible(true);
 				result = field.get(instance);
-			}finally {
+			} finally {
 				field.setAccessible(false);
 			}
 		}
 		return (T) result;
 	}
+
 	/**
 	 * 获取属性的值
 	 * 
-	 * @param fieldName         属性
+	 * @param fieldName     属性
 	 * @param proxyInstance 实例
 	 * @return 值
 	 * @throws IllegalArgumentException ex
 	 * @throws IllegalAccessException   ex
-	 * @throws SecurityException  ex
-	 * @throws NoSuchFieldException  ex
+	 * @throws SecurityException        ex
+	 * @throws NoSuchFieldException     ex
 	 */
 	public static <T> T getFieldValue(String fieldName, Object instance)
 			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		Field field = instance.getClass().getField(fieldName);
-		return getFieldValue(field,instance);
+		return getFieldValue(field, instance);
 	}
+
 	/**
 	 * 获取属性的值
 	 * 
-	 * @param fieldName         属性
+	 * @param fieldName     属性
 	 * @param proxyInstance 实例
 	 * @return 值
 	 * @throws IllegalArgumentException ex
 	 * @throws IllegalAccessException   ex
-	 * @throws SecurityException  ex
-	 * @throws NoSuchFieldException  ex
+	 * @throws SecurityException        ex
+	 * @throws NoSuchFieldException     ex
 	 */
 	public static <T> T getDeclaredFieldValue(String fieldName, Object instance)
 			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		Field field = instance.getClass().getDeclaredField(fieldName);
-		return getFieldValue(field,instance);
+		return getFieldValue(field, instance);
 	}
+
 	/**
 	 * 设置属性值
-	 * @param field 属性
+	 * 
+	 * @param field    属性
 	 * @param instance 实例
-	 * @param value 值
+	 * @param value    值
 	 * @throws IllegalArgumentException ex
-	 * @throws IllegalAccessException ex
+	 * @throws IllegalAccessException   ex
+	 * @throws InvocationTargetException 
 	 */
-	public static void setFieldValue(Field field, Object instance,Object value)
-			throws IllegalArgumentException, IllegalAccessException {
-		if(Modifier.isPublic(field.getModifiers())) {
-			field.set(instance, value);
-		}else {
-			try {
-				field.setAccessible(true);
+	public static void setFieldValue(Field field, Object instance, Object value)
+			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		String methodName = ReflectUtils.createFieldSetMethod(field);
+		Method method = ClassHelper.getClassHelper(instance.getClass()).getMethod(methodName, field.getType());
+		if (method != null) {
+			Class<?>[] parameter = new Class<?>[1];
+			parameter[0] = field.getType();
+			invokeMethod(instance, method, value);
+		} else {
+			if (Modifier.isPublic(field.getModifiers())) {
 				field.set(instance, value);
-			}finally {
-				field.setAccessible(false);
+			} else {
+				try {
+					field.setAccessible(true);
+					field.set(instance, value);
+				} finally {
+					field.setAccessible(false);
+				}
 			}
 		}
-		
+
 	}
+
 	/**
 	 * 设置属性值
+	 * 
 	 * @param fieldName 属性
-	 * @param instance 实例
-	 * @param value 值
+	 * @param instance  实例
+	 * @param value     值
 	 * @throws IllegalArgumentException ex
-	 * @throws IllegalAccessException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchFieldException  ex
+	 * @throws IllegalAccessException   ex
+	 * @throws SecurityException        ex
+	 * @throws NoSuchFieldException     ex
+	 * @throws InvocationTargetException ex
 	 */
-	public static void setFieldValue(String fieldName, Object instance,Object value)
-			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+	public static void setFieldValue(String fieldName, Object instance, Object value)
+			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InvocationTargetException {
 		Field field = instance.getClass().getField(fieldName);
 		setFieldValue(field, instance, value);
 	}
+
 	/**
 	 * 设置属性值
+	 * 
 	 * @param fieldName 属性
-	 * @param instance 实例
-	 * @param value 值
+	 * @param instance  实例
+	 * @param value     值
 	 * @throws IllegalArgumentException ex
-	 * @throws IllegalAccessException ex
-	 * @throws SecurityException ex
-	 * @throws NoSuchFieldException  ex
+	 * @throws IllegalAccessException   ex
+	 * @throws SecurityException        ex
+	 * @throws NoSuchFieldException     ex
+	 * @throws InvocationTargetException  ex
 	 */
-	public static void setDeclaredFieldValue(String fieldName, Object instance,Object value)
-			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+	public static void setDeclaredFieldValue(String fieldName, Object instance, Object value)
+			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InvocationTargetException {
 		Field field = instance.getClass().getDeclaredField(fieldName);
 		setFieldValue(field, instance, value);
 	}
+
 	/**
 	 * 类型传入类型是否为非空类型，主要用于某些值在初始化的时候不能为null
 	 * 
@@ -626,22 +674,24 @@ public class ReflectUtils {
 		}
 		return null;
 	}
+
 	/**
 	 * 获取类的指定泛型接口
 	 * 
 	 * @param field the field
-	 * @return 
+	 * @return
 	 * @return the generic type
 	 */
-	public static Type getGenericInterface(Class<?> clzz,Class<?> target) {
+	public static Type getGenericInterface(Class<?> clzz, Class<?> target) {
 		Type[] types = clzz.getGenericInterfaces();
-		for(Type type : types) {
-			if(type instanceof ParameterizedType && ((ParameterizedType)type).getRawType().equals(target)) {
+		for (Type type : types) {
+			if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType().equals(target)) {
 				return type;
 			}
 		}
 		throw new IllegalStateException();
 	}
+
 	/**
 	 * 获取Parameter为List的泛型
 	 * 
@@ -688,8 +738,9 @@ public class ReflectUtils {
 
 	public static StackTraceElement getStackTraceElement(int i) {
 		StackTraceElement[] stacks = new RuntimeException().getStackTrace();
-		return stacks[i+2];
+		return stacks[i + 2];
 	}
+
 	public static Class<?> getStackTraceClass(int i) {
 		try {
 			return ClassInfoCache.classForName(getStackTraceElement(i).getClassName());
@@ -697,8 +748,9 @@ public class ReflectUtils {
 			return null;
 		}
 	}
-	public static Class<?>[] getActualType(Type type){
-		if (type == null ) {
+
+	public static Class<?>[] getActualType(Type type) {
+		if (type == null) {
 			throw new RuntimeException("Missing type parameter.");
 		}
 		if (type instanceof ParameterizedType) {
@@ -714,18 +766,21 @@ public class ReflectUtils {
 		}
 		return null;
 	}
+
 	public static Class<?>[] getParameterizedType(Field field) {
-		Type type = field.getGenericType(); 
+		Type type = field.getGenericType();
 		return getActualType(type);
 	}
+
 	public static Class<?>[] getParameterizedType(Parameter parameter) {
 		Type type = parameter.getParameterizedType();
 		return getActualType(type);
 	}
+
 	public static Class<?>[] getParameterizedType(AnnotatedElement parameter) {
-		if(parameter instanceof Field)
+		if (parameter instanceof Field)
 			return getParameterizedType((Field) parameter);
-		if(parameter instanceof Parameter)
+		if (parameter instanceof Parameter)
 			return getParameterizedType((Parameter) parameter);
 		throw new IllegalArgumentException();
 	}

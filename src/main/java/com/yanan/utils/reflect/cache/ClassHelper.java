@@ -1,6 +1,7 @@
 package com.yanan.utils.reflect.cache;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,6 +36,9 @@ public class ClassHelper {
 	private Map<Class<?>,Annotation> declaredAnnotationMap = new HashMap<Class<?>,Annotation>();
 	private Map<Class<?>,Annotation> annotationMap = new HashMap<Class<?>,Annotation>();
 	
+	private Map<Annotation,Field[]> annotationFieldMap = new HashMap<>();
+	private Map<Annotation,Field[]> annotationMethodMap = new HashMap<>();
+	
 	private Method[] methods;
 	private Method[] declaredMethods;
 	private Field[] fields;//域缓存
@@ -45,6 +49,11 @@ public class ClassHelper {
 	private Annotation[] declaredAnnotations;
 	private Annotation[] annotations;
 	
+	
+	public Field[] getFieldByAnnotation(Annotation anno) {
+		Field[] fields = annotationFieldMap.get(anno);
+		return fields;
+	}
 	public static ClassHelper getClassHelper(Class<?> clzz){
 		return ClassInfoCache.getClassHelper(clzz);
 	}

@@ -129,7 +129,7 @@ public class ParameterUtils{
 	 * @return cast result
 	 * @throws ParseException ex
 	 */
-	public static Object parseBaseTypeArray(Class<?> clzz, String[] arg, String format) throws ParseException {
+	public static Object parseBaseTypeArray(Class<?> clzz, String[] arg, String format){
 		if (!clzz.isArray()) {
 			return parseBaseType(clzz, arg[0], format);
 		}

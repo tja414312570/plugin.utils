@@ -398,8 +398,10 @@ public class AppClassLoader extends ClassLoader{
 	 * @param field the target field
 	 * @param value the target value
 	 * @throws IllegalAccessException ex
+	 * @throws InvocationTargetException ex
+	 * @throws IllegalArgumentException ex
 	 */
-	public void setFieldValue(String field, Object value) throws IllegalAccessException {
+	public void setFieldValue(String field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Field f = this.classHelper.getDeclaredField(field);
 		setFieldValue(f, value);
 	}
@@ -411,9 +413,10 @@ public class AppClassLoader extends ClassLoader{
 	 * @throws SecurityException ex
 	 * @throws IllegalArgumentException ex
 	 * @throws IllegalAccessException ex
+	 * @throws InvocationTargetException ex
 	 */
 	public void setDeclaredFieldValue(String field, Object value)
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		Field f = this.classHelper.getDeclaredField(field);
 		setFieldValue(f, value);
 	}
@@ -424,8 +427,10 @@ public class AppClassLoader extends ClassLoader{
 	 * @param field the target field
 	 * @param value the target value
 	 * @throws IllegalAccessException ex
+	 * @throws InvocationTargetException ex
+	 * @throws IllegalArgumentException ex
 	 */
-	public void setFieldValue(Field field, Object value) throws IllegalAccessException {
+	public void setFieldValue(Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		ReflectUtils.setFieldValue(field, loadObject, value);
 	}
 
@@ -768,7 +773,7 @@ public class AppClassLoader extends ClassLoader{
 					}
 					
 					ReflectUtils.setFieldValue(f, target,  targetFieldObj);
-				} catch (IllegalArgumentException | IllegalAccessException | SecurityException | InstantiationException e) {
+				} catch (IllegalArgumentException | IllegalAccessException | SecurityException | InstantiationException | InvocationTargetException e) {
 					e.printStackTrace();
 				}
 			}
@@ -804,7 +809,7 @@ public class AppClassLoader extends ClassLoader{
 					Field fs = source.getClass().getDeclaredField(f.getName());
 					Object value = ReflectUtils.getFieldValue(fs, source);
 					ReflectUtils.setFieldValue(f, object, value);
-				} catch (NoSuchFieldException | SecurityException e) {
+				} catch (NoSuchFieldException | SecurityException | InvocationTargetException e) {
 					try {
 						Method fgm = source.getClass().getMethod(ClassInfoCache.getFieldGetMethod(f.getName()));
 						if (fgm != null)
