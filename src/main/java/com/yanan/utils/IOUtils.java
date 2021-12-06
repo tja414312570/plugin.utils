@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 
 public class IOUtils {
 	public static String toString(InputStream inputStream){
@@ -20,6 +21,21 @@ public class IOUtils {
 			throw new RuntimeException("failed to read stream",e);
 		}finally {
 			close(inputStream);
+		}
+	}
+	public static String toString(Reader reader) {
+		char[] bytes = new char[1024];
+		int len = 0;
+		try {
+			StringBuffer stringBuffer = new StringBuffer();
+			while((len = reader.read(bytes)) > 0) {
+				stringBuffer.append(bytes,0,len);
+			}
+			return stringBuffer.toString();
+		} catch (IOException e) {
+			throw new RuntimeException("failed to read stream",e);
+		}finally {
+			close(reader);
 		}
 	}
 	public static String toString(InputStream inputStream,String charset){
@@ -65,6 +81,7 @@ public class IOUtils {
 			}
 		}
 	}
+	
 	
 }
  
