@@ -41,7 +41,11 @@ public class ResourceManager {
 		}
 		int cpIndex = pathExpress.indexOf(CLASSPATH_EXPRESS);
 		if (cpIndex > -1) {
-			return new String[] { classPath() + pathExpress.substring(cpIndex + CLASSPATH_EXPRESS.length()) };
+			String classPath = classPath();
+			if(new File(classPath).isFile()) {
+				classPath += "!/";
+			}
+			return new String[] { classPath + pathExpress.substring(cpIndex + CLASSPATH_EXPRESS.length()) };
 		}
 		cpIndex = pathExpress.indexOf(CLASSPATHS_EXPRESS);
 		if (cpIndex > -1) {
@@ -52,7 +56,8 @@ public class ResourceManager {
 					Enumeration<URL> urls =  Thread.currentThread().getContextClassLoader().getResources(firstAbsolute);
 					List<String> list = new ArrayList<>();
 					while(urls.hasMoreElements()) {
-						list.add(processPath(urls.nextElement().getPath()+pathExpress.substring(cpIndex+CLASSPATHS_EXPRESS.length()+firstAbsolute.length())));
+						String url = urls.nextElement().getPath();
+						list.add(processPath(url+pathExpress.substring(cpIndex+CLASSPATHS_EXPRESS.length()+firstAbsolute.length())));
 					}
 					return list.toArray(new String[list.size()]);
 				} catch (IOException e) {
@@ -61,7 +66,11 @@ public class ResourceManager {
 			}else {
 				String[] temp = new String[classPaths().length];
 				for (int i = 0; i < temp.length; i++) {
-					temp[i] = classPaths()[i] + pathExpress.substring(cpIndex + CLASSPATHS_EXPRESS.length());
+					String classPath =classPaths()[i];
+					if(new File(classPath).isFile()) {
+						classPath += "!/";
+					}
+					temp[i] = classPath + pathExpress.substring(cpIndex + CLASSPATHS_EXPRESS.length());
 				}
 				return temp;
 			}
@@ -330,16 +339,15 @@ public class ResourceManager {
 	 * @return 处理后路径
 	 */
 	public static String processPath(String path) {
-		//nt系统
-		if (System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
-			if(path.startsWith("/")) {
-				path = path.substring(1);
-			}else {
-				path = path.replace('\\', '/');
-			}
-		}
 		if(path.startsWith("file:"))
 			path = path.substring(5);
+		//nt系统
+		if (System.getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+			if(path.charAt(0) == '/' || path.charAt(0) == '\\') {
+				path = path.substring(1);
+			}
+			path = path.replace('\\', '/');
+		}
 		return path.replace("%20", " ");
 	}
 }
