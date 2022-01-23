@@ -346,14 +346,15 @@ public class ReflectUtils {
 	 * @throws IllegalArgumentException  ex
 	 * @throws InvocationTargetException ex
 	 */
-	public static Object invokeMethod(Object instance, Method method, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
-		Object result;
+	@SuppressWarnings("unchecked")
+	public static <T> T invokeMethod(Object instance, Method method, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		T result;
 		if (Modifier.isPublic(method.getModifiers())) {
-			result = method.invoke(instance, args);
+			result = (T) method.invoke(instance, args);
 		} else {
 			try {
 				method.setAccessible(true);
-				result = method.invoke(instance, args);
+				result = (T) method.invoke(instance, args);
 			} finally {
 				method.setAccessible(false);
 			}
@@ -374,7 +375,7 @@ public class ReflectUtils {
 	 * @throws SecurityException         ex
 	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeMethod(Object instance, String methodName, Object... args) throws IllegalAccessException,
+	public static <T> T invokeMethod(Object instance, String methodName, Object... args) throws IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Class<?>[] types = ParameterUtils.getParameterTypes(args);
 		Method method = instance.getClass().getMethod(methodName, types);
