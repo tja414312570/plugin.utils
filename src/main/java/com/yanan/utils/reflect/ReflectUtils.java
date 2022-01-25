@@ -81,8 +81,12 @@ public class ReflectUtils {
 	 * @return 属性集合
 	 */
 	public static Field[] getAllFields(Class<?> targetClass) {
+		
+		return getAllFields(targetClass, Object.class);
+	}
+	public static Field[] getAllFields(Class<?> targetClass,Class<?> endClass) {
 		List<Field> list = new ArrayList<>();
-		while (targetClass != null && !targetClass.equals(Object.class)) {
+		while (targetClass != null && !targetClass.equals(endClass)) {
 			Field[] fields = targetClass.getDeclaredFields();
 			for (Field field : fields) {
 				list.add(field);
@@ -91,7 +95,6 @@ public class ReflectUtils {
 		}
 		return list.toArray(new Field[list.size()]);
 	}
-
 	/**
 	 * 通过类名获取类的所有public的方法
 	 * 
