@@ -9,6 +9,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.yanan.utils.reflect.cache.ClassHelper;
@@ -419,7 +420,7 @@ public class ReflectUtils {
 	 * @throws SecurityException         ex
 	 * @throws NoSuchMethodException
 	 */
-	public static Object invokeDeclaredMethod(Object instance, String methodName, Object... args)
+	public static <T> T invokeDeclaredMethod(Object instance, String methodName, Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
 			SecurityException {
 		Class<?>[] types = ParameterUtils.getParameterTypes(args);
@@ -688,6 +689,7 @@ public class ReflectUtils {
 	 */
 	public static Type getGenericInterface(Class<?> clzz, Class<?> target) {
 		Type[] types = clzz.getGenericInterfaces();
+		System.err.println(clzz+"-->"+Arrays.toString(types));
 		for (Type type : types) {
 			if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType().equals(target)) {
 				return type;
