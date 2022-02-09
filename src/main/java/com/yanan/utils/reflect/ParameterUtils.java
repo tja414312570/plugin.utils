@@ -74,23 +74,23 @@ public class ParameterUtils{
 		}
 		// 整形
 		if (targetType.equals(int.class)) {
-			return orgin == null?0:(int)(Integer.parseInt((orgin.toString()).equals("") ? "0" : orgin.toString()));
+			return orgin == null?0:(int)(Integer.parseInt(String.valueOf(orgin).equals("") ? "0" : orgin.toString()));
 		}
 		if (targetType.equals(short.class)) {
-			return orgin == null?0:Short.parseShort((String) orgin);
+			return orgin == null?0:Short.parseShort(String.valueOf(orgin));
 		}
 		if (targetType.equals(long.class)) {
-			return orgin == null?0:Long.parseLong(orgin.toString());
+			return orgin == null?0:Long.parseLong(String.valueOf(orgin));
 		}
 		if (targetType.equals(byte.class)) {
-			return orgin == null?0:Byte.parseByte(orgin.toString());
+			return orgin == null?0:Byte.parseByte(String.valueOf(orgin));
 		}
 		// 浮点
 		if (targetType.equals(float.class)) {
-			return orgin == null?0:Float.parseFloat(orgin.toString());
+			return orgin == null?0:Float.parseFloat(String.valueOf(orgin));
 		}
 		if (targetType.equals(double.class)) {
-			return orgin == null?false:Double.parseDouble(orgin.toString());
+			return orgin == null?false:Double.parseDouble(String.valueOf(orgin));
 		}
 		// 日期
 		if (targetType.equals(Date.class)) {
@@ -107,14 +107,14 @@ public class ParameterUtils{
 		}
 		// 布尔型
 		if (targetType.equals(boolean.class)) {
-			return orgin == null?false:Boolean.parseBoolean((String) orgin);
+			return Boolean.parseBoolean(String.valueOf(orgin));
 		}
 		// char
 		if (targetType.equals(char.class)) {
 			return orgin == null?0:(char) orgin;
 		}
 		if (targetType.equals(String.class)) {
-			return orgin == null?null:orgin.toString();
+			return orgin == null?null:String.valueOf(orgin);
 		}
 		// 没有匹配到返回源数据
 		return orgin;

@@ -597,9 +597,6 @@ public class ReflectUtils {
 			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		String methodName = ReflectUtils.createFieldSetMethod(field);
 		Method method = ClassHelper.getClassHelper(instance.getClass()).getMethod(methodName, field.getType());
-		if(value != null  && !field.getType().isAssignableFrom(value.getClass())) {
-			throw new RuntimeException("type mismatch,field:"+field.getType().getName()+",provid:"+value.getClass().getName());
-		}
 		if (method != null) {
 			Class<?>[] parameter = new Class<?>[1];
 			parameter[0] = field.getType();
