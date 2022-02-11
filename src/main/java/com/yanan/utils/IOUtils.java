@@ -72,7 +72,7 @@ public class IOUtils {
 		byte[] bytes = new byte[1024];
 		int len = 0;
 		try {
-			while ((len = inputStream.read(bytes)) != 0) {
+			while ((len = inputStream.read(bytes)) > 0) {
 				outputStream.write(bytes, 0, len);
 			}
 		} finally {
