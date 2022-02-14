@@ -689,7 +689,6 @@ public class ReflectUtils {
 	 */
 	public static Type getGenericInterface(Class<?> clzz, Class<?> target) {
 		Type[] types = clzz.getGenericInterfaces();
-		System.err.println(clzz+"-->"+Arrays.toString(types));
 		for (Type type : types) {
 			if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType().equals(target)) {
 				return type;
