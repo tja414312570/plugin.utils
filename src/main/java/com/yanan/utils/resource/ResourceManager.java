@@ -218,6 +218,9 @@ public class ResourceManager {
 				classPaths = System
 			    .getProperty("java.class.path")
 			    .split(pathSeparator);
+				for(int i = 0;i<classPaths.length;i++) {
+					classPaths[i] = processPath(classPaths[i]);
+				}
 			}
 		}
 		return classPaths;
