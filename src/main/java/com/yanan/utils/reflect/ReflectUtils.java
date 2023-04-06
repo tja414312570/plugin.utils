@@ -1,6 +1,9 @@
 package com.yanan.utils.reflect;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,7 +12,6 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.yanan.utils.reflect.cache.ClassHelper;
@@ -24,6 +26,11 @@ import com.yanan.utils.reflect.cache.ClassInfoCache;
  *
  */
 public class ReflectUtils {
+	private static final float METHOD_HANDLE_MIN_JDK_VERSION = 1.8f;
+	private static final int ALLOW_MODES = MethodHandles.Lookup.PUBLIC
+            | MethodHandles.Lookup.PRIVATE
+            | MethodHandles.Lookup.PROTECTED
+            | MethodHandles.Lookup.PACKAGE;
 	/**
 	 * 判断类是否存在，参数 完整类名
 	 * 
@@ -789,4 +796,26 @@ public class ReflectUtils {
 			return getParameterizedType((Parameter) parameter);
 		throw new IllegalArgumentException();
 	}
+	public static MethodHandle createMethodHandle(Method method) {
+        MethodHandles.Lookup lookup;
+        float version = Float.parseFloat(System.getProperty("java.specification.version"));
+        if(version < METHOD_HANDLE_MIN_JDK_VERSION){
+            throw new UnsupportedOperationException("jdk version ["+version+"] unsupport");
+        }
+       try{
+           Class<?> parentClass = method.getDeclaringClass();
+           if (version > METHOD_HANDLE_MIN_JDK_VERSION) {
+               lookup = MethodHandles.lookup();
+           } else {
+               Constructor<?> constructor = MethodHandles.Lookup.
+                       class.getDeclaredConstructor(Class.class,int.class);
+               constructor.setAccessible(true);
+               lookup = (MethodHandles.Lookup) constructor.newInstance(parentClass,ALLOW_MODES);
+           }
+           MethodHandle methodHandle = lookup.unreflectSpecial(method, parentClass);
+           return methodHandle;
+       }catch (Exception e){
+           throw new RuntimeException("create method handler failed!",e);
+       }
+    }
 }

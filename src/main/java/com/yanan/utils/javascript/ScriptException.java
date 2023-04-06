@@ -80,6 +80,15 @@ public class ScriptException extends Exception {
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
     }
+    public ScriptException(String message,
+            String fileName,
+            int lineNumber,
+            int columnNumber,Exception e) {
+        super(message,e);
+        this.fileName = fileName;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+    }
 
     public ScriptException(String msg, Exception e) {
     	super(msg,e);

@@ -9,18 +9,9 @@ import com.yanan.utils.string.PathMatcher.Token;
 
 public class test {
 	public static void main(String[] args) {
-
-		AtomicInteger integer = new AtomicInteger(0);
-		Executor executor = Executors.newFixedThreadPool(10);
-		Runnable runnable = new Runnable() {
-			@Override
-			public void run() {
-				throw new RuntimeException(integer.getAndIncrement()+"");
-			}
-		};
-		for(int i = 0;i<100;i++) {
-			executor.execute(runnable);
-		}
-		
+		String exp = "111/2222/{var1*}/3333/{var3**}/666??7";
+		String value = "111/2222/8888/3333/abcde/eftxe/666pp7";
+		System.err.println(PathMatcher.match(exp, value).isMatch());
+		System.err.println(PathMatcher.match(exp, value).getTokens());
 	}
 }

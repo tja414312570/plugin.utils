@@ -4,112 +4,89 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 import com.yanan.utils.javascript.Bindings;
-import com.yanan.utils.javascript.SimpleBindings;
 
-public class RhinoBindings extends SimpleBindings implements Bindings,Scriptable{
+public class RhinoBindings extends ScriptableObject implements Bindings{
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -4505297646865051666L;
+
+	@Override
+	public boolean containsValue(Object value) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> keySet() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Collection<Object> values() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Object put(String name, Object value) {
+		Object oldValue = super.get(name);
+		super.put(name, this, value);
+		return oldValue;
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> toMerge) {
+		toMerge.forEach((key,value)->{
+			super.put(key, this, value);
+		});
+	}
+
+	@Override
+	public boolean containsKey(String key) {
+		return super.has((String) key, this);
+	}
+
+	@Override
+	public Object remove(String key) {
+		Object value = super.get(key);
+		super.delete((String)key);
+		return value;
+	}
 
 	@Override
 	public String getClassName() {
-		return this.getClass().getName();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
-	public Object get(String name, Scriptable start) {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean containsKey(Object key) {
+		return this.containsKey((String)key);
 	}
 
 	@Override
-	public Object get(int index, Scriptable start) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object get(String key) {
+		return super.get(key);
 	}
 
 	@Override
-	public boolean has(String name, Scriptable start) {
-		// TODO Auto-generated method stub
-		return false;
+	public Object remove(Object key) {
+		return this.remove((String)key);
 	}
 
-	@Override
-	public boolean has(int index, Scriptable start) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void put(String name, Scriptable start, Object value) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void put(int index, Scriptable start, Object value) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(String name) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(int index) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Scriptable getPrototype() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setPrototype(Scriptable prototype) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Scriptable getParentScope() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setParentScope(Scriptable parent) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Object[] getIds() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object getDefaultValue(Class<?> hint) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean hasInstance(Scriptable instance) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
 
 }

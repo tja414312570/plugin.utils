@@ -93,7 +93,7 @@ public class Assert {
 	 * @param function if value is true execute function
 	 */
 	public static void isTrue(final boolean bol, Function function) {
-		if(bol && function != null) {
+		if(!bol && function != null) {
 			function.execute();
 		}
 	}

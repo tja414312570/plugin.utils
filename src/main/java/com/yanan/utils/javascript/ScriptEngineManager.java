@@ -5,12 +5,12 @@ import java.util.Map;
 
 public class ScriptEngineManager {
 	private static Map<String,ScriptEngineFactory> engineNameMapping = new HashMap<>();
-	private Bindings globalBindings = new SimpleBindings();
-	public  ScriptEngine getEngineByName(String name) {
+	private static Bindings globalBindings = new SimpleBindings();
+	public static ScriptEngine getEngineByName(String name) {
 		ScriptEngineFactory scriptEngineFactory = engineNameMapping.get(name);
 		if(scriptEngineFactory != null) {
 			ScriptEngine scriptEngine = scriptEngineFactory.getScriptEngine();
-			scriptEngine.setBindings(globalBindings);
+//			scriptEngine.setBindings(globalBindings);
 			return scriptEngine;
 		}
 		throw new RuntimeException("cant found engine for ["+name+"]");

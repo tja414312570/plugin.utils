@@ -1,29 +1,5 @@
 package com.yanan.utils.javascript;
 
-/*
- * Copyright (c) 2005, 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 
 import java.util.Map;
 
@@ -75,7 +51,7 @@ public interface Bindings extends Map<String, Object> {
      * @throws ClassCastException if key is not String
      * @throws IllegalArgumentException if key is empty String
      */
-    public boolean containsKey(Object key);
+    public boolean containsKey(String key);
 
     /**
      * Returns the value to which this map maps the specified key.  Returns
@@ -98,7 +74,7 @@ public interface Bindings extends Map<String, Object> {
      * @throws ClassCastException if key is not String
      * @throws IllegalArgumentException if key is empty String
      */
-    public Object get(Object key);
+    public Object get(String key);
 
     /**
      * Removes the mapping for this key from this map if it is present
@@ -122,5 +98,5 @@ public interface Bindings extends Map<String, Object> {
      * @throws ClassCastException if key is not String
      * @throws IllegalArgumentException if key is empty String
      */
-    public Object remove(Object key);
+    public Object remove(String key);
 }
