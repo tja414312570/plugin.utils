@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
 import com.yanan.utils.ArrayUtils;
@@ -214,52 +213,14 @@ public class ResourceManager {
 	public static String[] classPaths() {
 		if (classPaths == null) {
 			synchronized (ResourceManager.class) {
-				Vector<String> temp = new Vector<String>() {
-					private static final long serialVersionUID = 1L;
-					@Override
-					public synchronized int indexOf(Object o, int index) {
-				        if (o == null) {
-				            for (int i = index ; i < elementCount ; i++)
-				                if (elementData[i]==null)
-				                    return i;
-				        } else {
-				            for (int i = index ; i < elementCount ; i++)
-				                if (StringUtil.equals((String)o, (String)elementData[i]))
-				                    return i;
-				        }
-				        return -1;
-				    }
-				};
-				StackTraceElement[] stacks = new RuntimeException().getStackTrace();
-				Class<?> mainClass = null;
-				for (StackTraceElement stack : stacks) {
-					if (stack.getMethodName().equals("main")) {
-						try {
-							mainClass = Class.forName(stack.getClassName());
-							temp.add(getClassPath(mainClass)[0]);
-							break;
-						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
-						}
-					}
+				String pathSeparator = System
+					    .getProperty("path.separator");
+				classPaths = System
+			    .getProperty("java.class.path")
+			    .split(pathSeparator);
+				for(int i = 0;i<classPaths.length;i++) {
+					classPaths[i] = processPath(classPaths[i]);
 				}
-				ClassLoader loader = Thread.currentThread().getContextClassLoader();
-				String path = null;
-				while (loader != null) {
-					try {
-						Enumeration<URL> urls = loader.getResources(".");
-						while(urls.hasMoreElements()) {
-							path = processPath(urls.nextElement().getPath());
-							if (!temp.contains(path))
-								temp.add(path);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
-					loader = loader.getParent();
-				}
-				classPaths = temp.toArray(new String[] {});
 			}
 		}
 		return classPaths;
